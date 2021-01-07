@@ -4,16 +4,19 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"sync"
 	"time"
 )
 
 var (
-	factory *Factory
+	mutex   = &sync.Mutex{}
+	factory = NewFactory()
 )
 
 type Factory struct {
-	Workers chan *Worker
-	count   int
+	Workers    chan *Worker
+	attendance map[int]int
+	count      int
 }
 
 type Worker struct {
@@ -22,16 +25,16 @@ type Worker struct {
 }
 
 func init() {
-	factory = NewFactory()
 	factory.recruit(30)
 }
 
 func main() {
+	// 模擬 client
 	for i := 0; i < 100; i++ {
 		go fetch()
 	}
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(10 * time.Second)
 }
 
 func fetch() {
@@ -46,16 +49,25 @@ func fetch() {
 	fetch()
 }
 
-func (f *Factory) record() {
+func (f *Factory) record(w Worker) {
+	// 更新出勤表
+	mutex.Lock()
+	if _, ok := f.attendance[w.Number]; ok {
+		f.attendance[w.Number]++
+	} else {
+		f.attendance[w.Number] = 1
+	}
+	mutex.Unlock()
+
+	// 4. server 於每 100 次抽出時，印出每個號碼被抽取次數
 	f.count++
-	batch := 100
-	if f.count%batch == 0 {
-		log.Println(100)
+	if f.count%100 == 0 {
+		log.Println(f.attendance)
 	}
 }
 
 func (f *Factory) recruit(n int) {
-	for i := 0; i < n; i++ {
+	for i := 1; i <= n; i++ {
 		go func(i int) {
 			f.Workers <- NewWorker(i)
 		}(i)
@@ -65,9 +77,9 @@ func (f *Factory) recruit(n int) {
 func (f *Factory) dequeue() *Worker {
 	// 7. 號碼被 client 抽出期間，不可再被抽出
 	select {
-	case e := <-f.Workers:
-		f.record()
-		return e
+	case w := <-f.Workers:
+		f.record(*w)
+		return w
 	default:
 		return nil
 	}
@@ -85,7 +97,8 @@ func (f *Factory) enqueue(w *Worker) bool {
 
 func NewFactory() *Factory {
 	return &Factory{
-		Workers: make(chan *Worker, 30),
+		Workers:    make(chan *Worker, 30),
+		attendance: make(map[int]int),
 	}
 }
 
