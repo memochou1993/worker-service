@@ -13,7 +13,7 @@ var (
 )
 
 type Factory struct {
-	Workers    chan *Worker
+	workers    chan *Worker
 	attendance map[int]int
 	count      int
 }
@@ -63,7 +63,7 @@ func (f *Factory) record(w Worker) {
 func (f *Factory) recruit(n int) {
 	for i := 1; i <= n; i++ {
 		go func(i int) {
-			f.Workers <- NewWorker(i)
+			f.workers <- NewWorker(i)
 		}(i)
 	}
 }
@@ -71,7 +71,7 @@ func (f *Factory) recruit(n int) {
 func (f *Factory) dequeue() *Worker {
 	// 7. 號碼被 client 抽出期間，不可再被抽出
 	select {
-	case w := <-f.Workers:
+	case w := <-f.workers:
 		f.record(*w)
 		return w
 	default:
@@ -82,7 +82,7 @@ func (f *Factory) dequeue() *Worker {
 func (f *Factory) enqueue(w *Worker) bool {
 	select {
 	// 8. client 抽出的 Delay 需每次隨機不同
-	case f.Workers <- NewWorker(w.Number):
+	case f.workers <- NewWorker(w.Number):
 		return true
 	default:
 		return false
@@ -91,7 +91,7 @@ func (f *Factory) enqueue(w *Worker) bool {
 
 func NewFactory() *Factory {
 	return &Factory{
-		Workers:    make(chan *Worker, 30),
+		workers:    make(chan *Worker, 30),
 		attendance: make(map[int]int),
 	}
 }
