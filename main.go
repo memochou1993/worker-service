@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"sync"
@@ -29,19 +28,14 @@ func init() {
 }
 
 func main() {
-	// 模擬 client
-	for i := 0; i < 100; i++ {
-		go fetch()
-	}
-
-	time.Sleep(10 * time.Second)
+	//
 }
 
 func fetch() {
 	// 6. client 抽出的 Entity 需確實在 server 端消失, 並於放回後重新於 server 產生
 	if w := factory.dequeue(); w != nil {
 		time.Sleep(time.Duration(w.Delay) * time.Millisecond)
-		log.Println(fmt.Sprintf("Number: %d, Delay: %d", w.Number, w.Delay))
+		// log.Println(fmt.Sprintf("Number: %d, Delay: %d", w.Number, w.Delay))
 		factory.enqueue(w)
 		return
 	}
