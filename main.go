@@ -1,10 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"math/rand"
+	"net/http"
+	"strconv"
 	"sync"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -19,8 +24,12 @@ type Factory struct {
 }
 
 type Worker struct {
-	Number int
-	Delay  int64
+	Number int   `json:"number"`
+	Delay  int64 `json:"delay"`
+}
+
+type Payload struct {
+	Data interface{} `json:"data"`
 }
 
 func init() {
@@ -28,7 +37,69 @@ func init() {
 }
 
 func main() {
-	//
+	r := mux.NewRouter()
+	r.HandleFunc("/worker", getWorker).Methods(http.MethodGet)
+	r.HandleFunc("/worker", putWorker).Methods(http.MethodPut)
+	r.HandleFunc("/workers", listWorkers).Methods(http.MethodGet)
+	r.HandleFunc("/workers/{n}", showWorker).Methods(http.MethodGet)
+
+	log.Fatalln(http.ListenAndServe(":8890", r))
+}
+
+func getWorker(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	if worker := factory.dequeue(); worker != nil {
+		response(w, http.StatusOK, worker)
+		return
+	}
+
+	response(w, http.StatusNotFound, nil)
+}
+
+func putWorker(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var worker Worker
+	if err := json.NewDecoder(r.Body).Decode(&worker); err != nil {
+		response(w, http.StatusInternalServerError, nil)
+		return
+	}
+	factory.enqueue(newWorker(worker.Number))
+
+	response(w, http.StatusNoContent, nil)
+}
+
+func listWorkers(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	response(w, http.StatusOK, factory.attendance)
+}
+
+func showWorker(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	n, err := strconv.Atoi(mux.Vars(r)["n"])
+	if err != nil {
+		response(w, http.StatusNotFound, nil)
+		return
+	}
+	if _, ok := factory.attendance[n]; !ok {
+		response(w, http.StatusNotFound, nil)
+		return
+	}
+
+	response(w, http.StatusOK, map[int]int{n: factory.attendance[n]})
+}
+
+func response(w http.ResponseWriter, code int, data interface{}) {
+	w.WriteHeader(code)
+	if data == nil {
+		return
+	}
+	if err := json.NewEncoder(w).Encode(Payload{Data: data}); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func fetch() {
