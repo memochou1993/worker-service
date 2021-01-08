@@ -14,17 +14,17 @@ import (
 
 var (
 	mutex   = &sync.Mutex{}
-	factory = newFactory()
+	service = newService()
 )
 
 // number 代表工人號碼
 type number int64
 
-// summoned 代表工人傳喚次數
+// summoned 代表工人被傳喚次數
 type summoned int64
 
-// Factory 代表工廠
-type Factory struct {
+// Service 代表服務
+type Service struct {
 	workers    chan *Worker
 	attendance map[number]summoned
 	summoned
@@ -36,7 +36,7 @@ type Worker struct {
 	Delay  int64  `json:"delay"`
 }
 
-// Record 代表工人傳喚記錄
+// Record 代表工人被傳喚記錄
 type Record struct {
 	Number   number   `json:"number"`
 	Summoned summoned `json:"summoned"`
@@ -49,7 +49,7 @@ type Payload struct {
 
 func init() {
 	// 應徵工人
-	factory.recruit(30)
+	service.recruit(30)
 }
 
 func main() {
@@ -70,7 +70,7 @@ func main() {
 func getWorker(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	if worker := factory.dequeue(); worker != nil {
+	if worker := service.dequeue(); worker != nil {
 		response(w, http.StatusOK, worker)
 		return
 	}
@@ -87,7 +87,7 @@ func putWorker(w http.ResponseWriter, r *http.Request) {
 		response(w, http.StatusInternalServerError, nil)
 		return
 	}
-	factory.enqueue(newWorker(worker.Number))
+	service.enqueue(newWorker(worker.Number))
 
 	response(w, http.StatusNoContent, nil)
 }
@@ -97,7 +97,7 @@ func listWorkers(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var records []Record
-	for n, u := range factory.attendance {
+	for n, u := range service.attendance {
 		records = append(records, Record{n, u})
 	}
 
@@ -113,12 +113,12 @@ func showWorker(w http.ResponseWriter, r *http.Request) {
 		response(w, http.StatusNotFound, nil)
 		return
 	}
-	if _, ok := factory.attendance[number(n)]; !ok {
+	if _, ok := service.attendance[number(n)]; !ok {
 		response(w, http.StatusNotFound, nil)
 		return
 	}
 
-	record := Record{number(n), factory.attendance[number(n)]}
+	record := Record{number(n), service.attendance[number(n)]}
 
 	response(w, http.StatusOK, record)
 }
@@ -137,10 +137,10 @@ func response(w http.ResponseWriter, code int, data interface{}) {
 // 客戶端呼叫
 func fetch() {
 	// client 抽出的 Entity 須確實在 server 端消失, 並於放回後重新於 server 產生
-	if w := factory.dequeue(); w != nil {
+	if w := service.dequeue(); w != nil {
 		time.Sleep(time.Duration(w.Delay) * time.Microsecond)
 		// log.Println(fmt.Sprintf("Number: %d, Delay: %d", w.Number, w.Delay))
-		factory.enqueue(w)
+		service.enqueue(w)
 		return
 	}
 	// client 抽不到號碼須等待
@@ -148,7 +148,7 @@ func fetch() {
 }
 
 // 更新出勤表
-func (f *Factory) record(w Worker) {
+func (f *Service) record(w Worker) {
 	// 號碼被 client 抽出後, server 需紀錄號碼被抽出次數
 	mutex.Lock()
 	if _, ok := f.attendance[w.Number]; ok {
@@ -160,7 +160,7 @@ func (f *Factory) record(w Worker) {
 }
 
 // 印出出勤表
-func (f *Factory) alert() {
+func (f *Service) alert() {
 	// server 於每 100 次抽出時，印出每個號碼被抽取次數
 	f.summoned++
 	if f.summoned%100 == 0 {
@@ -169,7 +169,7 @@ func (f *Factory) alert() {
 }
 
 // 放入工人
-func (f *Factory) enqueue(w *Worker) bool {
+func (f *Service) enqueue(w *Worker) bool {
 	// client 抽出的 Delay 須每次隨機不同
 	select {
 	case f.workers <- newWorker(w.Number):
@@ -180,7 +180,7 @@ func (f *Factory) enqueue(w *Worker) bool {
 }
 
 // 取出工人
-func (f *Factory) dequeue() *Worker {
+func (f *Service) dequeue() *Worker {
 	// 號碼被 client 抽出期間，不可再被抽出
 	select {
 	case w := <-f.workers:
@@ -193,7 +193,7 @@ func (f *Factory) dequeue() *Worker {
 }
 
 // 應徵工人
-func (f *Factory) recruit(n int) {
+func (f *Service) recruit(n int) {
 	// server 須於被要求時，隨機決定被抽出的尚存號碼實體，不可預先排序
 	wg := sync.WaitGroup{}
 	wg.Add(n)
@@ -206,9 +206,9 @@ func (f *Factory) recruit(n int) {
 	wg.Wait()
 }
 
-// 建立新工廠
-func newFactory() *Factory {
-	return &Factory{
+// 建立新服務
+func newService() *Service {
+	return &Service{
 		workers:    make(chan *Worker, 30),
 		attendance: make(map[number]summoned),
 	}

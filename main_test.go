@@ -19,7 +19,7 @@ func TestFetch(t *testing.T) {
 	wg.Wait()
 
 	count := summoned(0)
-	for _, v := range factory.attendance {
+	for _, v := range service.attendance {
 		count += summoned(v)
 	}
 
@@ -27,7 +27,7 @@ func TestFetch(t *testing.T) {
 		t.Fatal()
 	}
 
-	if factory.summoned != summoned(times) {
+	if service.summoned != summoned(times) {
 		t.Fatal()
 	}
 }
