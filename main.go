@@ -17,44 +17,56 @@ var (
 	factory = newFactory()
 )
 
-type Factory struct {
-	workers    chan *Worker
-	attendance map[number]used
-	count      int
-}
-
+// number 代表工人號碼
 type number int64
 
-type used int64
+// summoned 代表工人傳喚次數
+type summoned int64
 
+// Factory 代表工廠
+type Factory struct {
+	workers    chan *Worker
+	attendance map[number]summoned
+	summoned
+}
+
+// Worker 代表工人
 type Worker struct {
 	Number number `json:"number"`
 	Delay  int64  `json:"delay"`
 }
 
+// Record 代表工人傳喚記錄
 type Record struct {
-	Number number `json:"number"`
-	Used   used   `json:"used"`
+	Number   number   `json:"number"`
+	Summoned summoned `json:"summoned"`
 }
 
+// Payload 代表回應資料
 type Payload struct {
 	Data interface{} `json:"data"`
 }
 
 func init() {
+	// 應徵工人
 	factory.recruit(30)
 }
 
 func main() {
 	r := mux.NewRouter()
+	// 索取一個工人
 	r.HandleFunc("/worker", getWorker).Methods(http.MethodGet)
+	// 退還一個工人
 	r.HandleFunc("/worker", putWorker).Methods(http.MethodPut)
+	// 列出所有工人
 	r.HandleFunc("/workers", listWorkers).Methods(http.MethodGet)
+	// 查看特定工人
 	r.HandleFunc("/workers/{n}", showWorker).Methods(http.MethodGet)
 
 	log.Fatalln(http.ListenAndServe(":8890", r))
 }
 
+// 索取一個工人
 func getWorker(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -66,6 +78,7 @@ func getWorker(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusNotFound, nil)
 }
 
+// 退還一個工人
 func putWorker(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -79,6 +92,7 @@ func putWorker(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusNoContent, nil)
 }
 
+// 列出所有工人
 func listWorkers(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -90,6 +104,7 @@ func listWorkers(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusOK, records)
 }
 
+// 查看特定工人
 func showWorker(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -108,6 +123,7 @@ func showWorker(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusOK, record)
 }
 
+// 回應
 func response(w http.ResponseWriter, code int, data interface{}) {
 	w.WriteHeader(code)
 	if data == nil {
@@ -118,6 +134,7 @@ func response(w http.ResponseWriter, code int, data interface{}) {
 	}
 }
 
+// 客戶端呼叫
 func fetch() {
 	// client 抽出的 Entity 須確實在 server 端消失, 並於放回後重新於 server 產生
 	if w := factory.dequeue(); w != nil {
@@ -130,6 +147,7 @@ func fetch() {
 	fetch()
 }
 
+// 更新出勤表
 func (f *Factory) record(w Worker) {
 	// 號碼被 client 抽出後, server 需紀錄號碼被抽出次數
 	mutex.Lock()
@@ -141,14 +159,27 @@ func (f *Factory) record(w Worker) {
 	mutex.Unlock()
 }
 
+// 印出出勤表
 func (f *Factory) alert() {
 	// server 於每 100 次抽出時，印出每個號碼被抽取次數
-	f.count++
-	if f.count%100 == 0 {
+	f.summoned++
+	if f.summoned%100 == 0 {
 		log.Println(f.attendance)
 	}
 }
 
+// 放入工人
+func (f *Factory) enqueue(w *Worker) bool {
+	// client 抽出的 Delay 須每次隨機不同
+	select {
+	case f.workers <- newWorker(w.Number):
+		return true
+	default:
+		return false
+	}
+}
+
+// 取出工人
 func (f *Factory) dequeue() *Worker {
 	// 號碼被 client 抽出期間，不可再被抽出
 	select {
@@ -161,16 +192,7 @@ func (f *Factory) dequeue() *Worker {
 	}
 }
 
-func (f *Factory) enqueue(w *Worker) bool {
-	// client 抽出的 Delay 須每次隨機不同
-	select {
-	case f.workers <- newWorker(w.Number):
-		return true
-	default:
-		return false
-	}
-}
-
+// 應徵工人
 func (f *Factory) recruit(n int) {
 	// server 須於被要求時，隨機決定被抽出的尚存號碼實體，不可預先排序
 	wg := sync.WaitGroup{}
@@ -184,13 +206,15 @@ func (f *Factory) recruit(n int) {
 	wg.Wait()
 }
 
+// 建立新工廠
 func newFactory() *Factory {
 	return &Factory{
 		workers:    make(chan *Worker, 30),
-		attendance: make(map[number]used),
+		attendance: make(map[number]summoned),
 	}
 }
 
+// 建立新工人
 func newWorker(n number) *Worker {
 	return &Worker{
 		Number: n,

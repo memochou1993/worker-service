@@ -18,16 +18,16 @@ func TestFetch(t *testing.T) {
 	}
 	wg.Wait()
 
-	count := 0
+	count := summoned(0)
 	for _, v := range factory.attendance {
-		count += int(v)
+		count += summoned(v)
 	}
 
-	if count != times {
+	if count != summoned(times) {
 		t.Fatal()
 	}
 
-	if factory.count != times {
+	if factory.summoned != summoned(times) {
 		t.Fatal()
 	}
 }
