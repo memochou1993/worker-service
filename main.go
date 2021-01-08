@@ -34,7 +34,7 @@ func main() {
 func fetch() {
 	// client 抽出的 Entity 須確實在 server 端消失, 並於放回後重新於 server 產生
 	if w := factory.dequeue(); w != nil {
-		time.Sleep(time.Duration(w.Delay) * time.Millisecond)
+		time.Sleep(time.Duration(w.Delay) * time.Microsecond)
 		// log.Println(fmt.Sprintf("Number: %d, Delay: %d", w.Number, w.Delay))
 		factory.enqueue(w)
 		return
