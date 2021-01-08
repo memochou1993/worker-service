@@ -32,14 +32,14 @@ func main() {
 }
 
 func fetch() {
-	// client 抽出的 Entity 需確實在 server 端消失, 並於放回後重新於 server 產生
+	// client 抽出的 Entity 須確實在 server 端消失, 並於放回後重新於 server 產生
 	if w := factory.dequeue(); w != nil {
 		time.Sleep(time.Duration(w.Delay) * time.Millisecond)
 		// log.Println(fmt.Sprintf("Number: %d, Delay: %d", w.Number, w.Delay))
 		factory.enqueue(w)
 		return
 	}
-	// client 抽不到號碼需等待
+	// client 抽不到號碼須等待
 	fetch()
 }
 
@@ -75,7 +75,7 @@ func (f *Factory) dequeue() *Worker {
 }
 
 func (f *Factory) enqueue(w *Worker) bool {
-	// client 抽出的 Delay 需每次隨機不同
+	// client 抽出的 Delay 須每次隨機不同
 	select {
 	case f.workers <- newWorker(w.Number):
 		return true
@@ -85,9 +85,16 @@ func (f *Factory) enqueue(w *Worker) bool {
 }
 
 func (f *Factory) recruit(n int) {
+	// server 須於被要求時，隨機決定被抽出的尚存號碼實體，不可預先排序
+	wg := sync.WaitGroup{}
+	wg.Add(n)
 	for i := 1; i <= n; i++ {
-		f.workers <- newWorker(i)
+		go func(i int) {
+			defer wg.Done()
+			f.workers <- newWorker(i)
+		}(i)
 	}
+	wg.Wait()
 }
 
 func newFactory() *Factory {
