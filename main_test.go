@@ -24,10 +24,10 @@ func TestFetch(t *testing.T) {
 	}
 
 	if count != times {
-		t.Fail()
+		t.Fatal()
 	}
 
 	if factory.count != times {
-		t.Fail()
+		t.Fatal()
 	}
 }

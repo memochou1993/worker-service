@@ -9,7 +9,7 @@ import (
 
 var (
 	mutex   = &sync.Mutex{}
-	factory = NewFactory()
+	factory = newFactory()
 )
 
 type Factory struct {
@@ -32,14 +32,14 @@ func main() {
 }
 
 func fetch() {
-	// 6. client 抽出的 Entity 需確實在 server 端消失, 並於放回後重新於 server 產生
+	// client 抽出的 Entity 需確實在 server 端消失, 並於放回後重新於 server 產生
 	if w := factory.dequeue(); w != nil {
 		time.Sleep(time.Duration(w.Delay) * time.Millisecond)
 		// log.Println(fmt.Sprintf("Number: %d, Delay: %d", w.Number, w.Delay))
 		factory.enqueue(w)
 		return
 	}
-	// 9. client 抽不到號碼需等待
+	// client 抽不到號碼需等待
 	fetch()
 }
 
@@ -52,27 +52,22 @@ func (f *Factory) record(w Worker) {
 		f.attendance[w.Number] = 1
 	}
 	mutex.Unlock()
+}
 
-	// 4. server 於每 100 次抽出時，印出每個號碼被抽取次數
+func (f *Factory) alert() {
+	// server 於每 100 次抽出時，印出每個號碼被抽取次數
 	f.count++
 	if f.count%100 == 0 {
 		log.Println(f.attendance)
 	}
 }
 
-func (f *Factory) recruit(n int) {
-	for i := 1; i <= n; i++ {
-		go func(i int) {
-			f.workers <- NewWorker(i)
-		}(i)
-	}
-}
-
 func (f *Factory) dequeue() *Worker {
-	// 7. 號碼被 client 抽出期間，不可再被抽出
+	// 號碼被 client 抽出期間，不可再被抽出
 	select {
 	case w := <-f.workers:
 		f.record(*w)
+		f.alert()
 		return w
 	default:
 		return nil
@@ -80,23 +75,29 @@ func (f *Factory) dequeue() *Worker {
 }
 
 func (f *Factory) enqueue(w *Worker) bool {
+	// client 抽出的 Delay 需每次隨機不同
 	select {
-	// 8. client 抽出的 Delay 需每次隨機不同
-	case f.workers <- NewWorker(w.Number):
+	case f.workers <- newWorker(w.Number):
 		return true
 	default:
 		return false
 	}
 }
 
-func NewFactory() *Factory {
+func (f *Factory) recruit(n int) {
+	for i := 1; i <= n; i++ {
+		f.workers <- newWorker(i)
+	}
+}
+
+func newFactory() *Factory {
 	return &Factory{
 		workers:    make(chan *Worker, 30),
 		attendance: make(map[int]int),
 	}
 }
 
-func NewWorker(n int) *Worker {
+func newWorker(n int) *Worker {
 	return &Worker{
 		Number: n,
 		Delay:  int64(rand.Intn(10)),
