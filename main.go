@@ -23,9 +23,9 @@ type Factory struct {
 	count      int
 }
 
-type number int
+type number int64
 
-type used int
+type used int64
 
 type Worker struct {
 	Number number `json:"number"`
