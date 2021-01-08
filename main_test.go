@@ -20,7 +20,7 @@ func TestFetch(t *testing.T) {
 
 	count := 0
 	for _, v := range factory.attendance {
-		count += v
+		count += int(v)
 	}
 
 	if count != times {

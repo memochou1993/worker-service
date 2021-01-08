@@ -19,13 +19,22 @@ var (
 
 type Factory struct {
 	workers    chan *Worker
-	attendance map[int]int
+	attendance map[number]used
 	count      int
 }
 
+type number int
+
+type used int
+
 type Worker struct {
-	Number int   `json:"number"`
-	Delay  int64 `json:"delay"`
+	Number number `json:"number"`
+	Delay  int64  `json:"delay"`
+}
+
+type Record struct {
+	Number number `json:"number"`
+	Used   used   `json:"used"`
 }
 
 type Payload struct {
@@ -73,7 +82,12 @@ func putWorker(w http.ResponseWriter, r *http.Request) {
 func listWorkers(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	response(w, http.StatusOK, factory.attendance)
+	var records []Record
+	for n, u := range factory.attendance {
+		records = append(records, Record{n, u})
+	}
+
+	response(w, http.StatusOK, records)
 }
 
 func showWorker(w http.ResponseWriter, r *http.Request) {
@@ -84,12 +98,14 @@ func showWorker(w http.ResponseWriter, r *http.Request) {
 		response(w, http.StatusNotFound, nil)
 		return
 	}
-	if _, ok := factory.attendance[n]; !ok {
+	if _, ok := factory.attendance[number(n)]; !ok {
 		response(w, http.StatusNotFound, nil)
 		return
 	}
 
-	response(w, http.StatusOK, map[int]int{n: factory.attendance[n]})
+	record := Record{number(n), factory.attendance[number(n)]}
+
+	response(w, http.StatusOK, record)
 }
 
 func response(w http.ResponseWriter, code int, data interface{}) {
@@ -162,7 +178,7 @@ func (f *Factory) recruit(n int) {
 	for i := 1; i <= n; i++ {
 		go func(i int) {
 			defer wg.Done()
-			f.workers <- newWorker(i)
+			f.workers <- newWorker(number(i))
 		}(i)
 	}
 	wg.Wait()
@@ -171,11 +187,11 @@ func (f *Factory) recruit(n int) {
 func newFactory() *Factory {
 	return &Factory{
 		workers:    make(chan *Worker, 30),
-		attendance: make(map[int]int),
+		attendance: make(map[number]used),
 	}
 }
 
-func newWorker(n int) *Worker {
+func newWorker(n number) *Worker {
 	return &Worker{
 		Number: n,
 		Delay:  int64(rand.Intn(10)),
