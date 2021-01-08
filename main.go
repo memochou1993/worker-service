@@ -44,7 +44,7 @@ func fetch() {
 }
 
 func (f *Factory) record(w Worker) {
-	// 更新出勤表
+	// 號碼被 client 抽出後, server 需紀錄號碼被抽出次數
 	mutex.Lock()
 	if _, ok := f.attendance[w.Number]; ok {
 		f.attendance[w.Number]++
