@@ -50,11 +50,11 @@ func summon(ctx context.Context) {
 	}
 
 	// 延遲
-	time.Sleep(time.Duration(w.Delay) * time.Microsecond)
-	log.Printf("Number: %d, Delay: %d", w.Number, w.Delay)
+	time.Sleep(time.Duration(w.Worker.Delay) * time.Microsecond)
+	log.Printf("Number: %d, Delay: %d", w.Worker.Number, w.Worker.Delay)
 
 	// 放回工人
-	client.PutWorker(ctx, &gw.PutWorkerRequest{Number: w.Number})
+	client.PutWorker(ctx, &gw.PutWorkerRequest{Number: w.Worker.Number})
 }
 
 func NewClientConn(ctx context.Context, addr string) *grpc.ClientConn {

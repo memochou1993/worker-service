@@ -28,11 +28,20 @@ service Service {
   }
 }
 
+message Worker {
+  int64 number = 1;
+  int64 delay = 2;
+}
+
+message Record {
+  int64 number = 1;
+  int64 summoned = 2;
+}
+
 message GetWorkerRequest {}
 
 message GetWorkerResponse {
-  int64 number = 1;
-  int64 delay = 2;
+  Worker worker = 1;
 }
 
 message PutWorkerRequest {
@@ -43,13 +52,14 @@ message PutWorkerResponse {}
 
 message ListWorkerRequest {}
 
-message ListWorkerResponse {}
+message ListWorkerResponse {
+  repeated Record records = 1;
+}
 
 message ShowWorkerRequest {
   int64 number = 1;
 }
 
 message ShowWorkerResponse {
-  int64 number = 1;
-  int64 summoned = 2;
+  Record record = 1;
 }

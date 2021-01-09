@@ -1,4 +1,4 @@
-package worker
+package app
 
 import (
 	"log"
@@ -29,17 +29,6 @@ type Worker struct {
 	Delay  int64 `json:"delay"`
 }
 
-// Record 工人被傳喚記錄
-type Record struct {
-	Number   `json:"Number"`
-	Summoned `json:"Summoned"`
-}
-
-// Payload 回應資料
-type Payload struct {
-	Data interface{} `json:"data"`
-}
-
 // 紀錄出勤表
 func (s *Service) record(w Worker) {
 	mutex.Lock()
@@ -51,7 +40,7 @@ func (s *Service) record(w Worker) {
 	mutex.Unlock()
 }
 
-// 印出出勤表
+// 列印出勤表
 func (s *Service) alert() {
 	s.Summoned++
 	if s.Summoned%100 == 0 {
