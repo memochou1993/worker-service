@@ -10,42 +10,23 @@ var (
 	mutex = &sync.Mutex{}
 )
 
-// Number 工人號碼
+// 工人號碼
 type Number int64
 
-// Summoned 工人被傳喚次數
+// 工人被傳喚次數
 type Summoned int64
 
-// Service 服務
+// 服務
 type Service struct {
 	Workers    chan *Worker
 	Attendance map[Number]Summoned
 	Summoned
 }
 
-// Worker 工人
+// 工人
 type Worker struct {
 	Number `json:"Number"`
 	Delay  int64 `json:"delay"`
-}
-
-// 紀錄出勤表
-func (s *Service) record(w Worker) {
-	mutex.Lock()
-	if _, ok := s.Attendance[w.Number]; ok {
-		s.Attendance[w.Number]++
-	} else {
-		s.Attendance[w.Number] = 1
-	}
-	mutex.Unlock()
-}
-
-// 列印出勤表
-func (s *Service) alert() {
-	s.Summoned++
-	if s.Summoned%100 == 0 {
-		log.Println(s.Attendance)
-	}
 }
 
 // 放入工人
@@ -62,8 +43,7 @@ func (s *Service) Enqueue(w *Worker) bool {
 func (s *Service) Dequeue() *Worker {
 	select {
 	case w := <-s.Workers:
-		s.record(*w)
-		s.alert()
+		s.log(*w)
 		return w
 	default:
 		return nil
@@ -82,6 +62,22 @@ func (s *Service) Recruit(n int) *Service {
 	}
 	wg.Wait()
 	return s
+}
+
+// 紀錄出勤表
+func (s *Service) log(w Worker) {
+	mutex.Lock()
+	if _, ok := s.Attendance[w.Number]; ok {
+		s.Attendance[w.Number]++
+	} else {
+		s.Attendance[w.Number] = 1
+	}
+	mutex.Unlock()
+
+	s.Summoned++
+	if s.Summoned%100 == 0 {
+		log.Println(s.Attendance)
+	}
 }
 
 // 建立新服務
