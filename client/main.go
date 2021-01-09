@@ -23,12 +23,16 @@ func main() {
 	defer cancel()
 
 	conn := NewClientConn(ctx, target)
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			log.Fatalln(err.Error())
+		}
+	}()
 
 	client = gw.NewServiceClient(conn)
 
 	for i := 0; i < 100; i++ {
-		summon(context.Background())
+		summon(ctx)
 	}
 }
 
@@ -41,10 +45,14 @@ func summon(ctx context.Context) {
 		return
 	}
 
+	if ctx.Err() != nil {
+		return
+	}
+
 	// 等待
 	if s.Code() == codes.NotFound {
 		time.Sleep(time.Microsecond)
-		log.Println("waiting...")
+		log.Println("retrying...")
 		summon(ctx)
 		return
 	}
@@ -54,7 +62,10 @@ func summon(ctx context.Context) {
 	log.Printf("Number: %d, Delay: %d", w.Worker.Number, w.Worker.Delay)
 
 	// 放回工人
-	client.PutWorker(ctx, &gw.PutWorkerRequest{Number: w.Worker.Number})
+	_, err = client.PutWorker(ctx, &gw.PutWorkerRequest{Number: w.Worker.Number})
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 }
 
 func NewClientConn(ctx context.Context, addr string) *grpc.ClientConn {
