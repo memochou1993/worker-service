@@ -1,10 +1,31 @@
 syntax = "proto3";
 
-option go_package = ".;hello";
+option go_package = ".;service";
+
+import "google/api/annotations.proto";
 
 service Service {
-  rpc GetWorker (GetWorkerRequest) returns (GetWorkerResponse) {}
-  rpc PutWorker (PutWorkerRequest) returns (PutWorkerResponse) {}
+  rpc GetWorker (GetWorkerRequest) returns (GetWorkerResponse) {
+    option (google.api.http) = {
+      get: "/worker"
+    };
+  }
+  rpc PutWorker (PutWorkerRequest) returns (PutWorkerResponse) {
+    option (google.api.http) = {
+      put: "/worker"
+      body: "*"
+    };
+  }
+  rpc ListWorker (ListWorkerRequest) returns (ListWorkerResponse) {
+    option (google.api.http) = {
+      get: "/workers"
+    };
+  }
+  rpc ShowWorker (ShowWorkerRequest) returns (ShowWorkerResponse) {
+    option (google.api.http) = {
+      get: "/workers/{number}"
+    };
+  }
 }
 
 message GetWorkerRequest {}
@@ -19,3 +40,16 @@ message PutWorkerRequest {
 }
 
 message PutWorkerResponse {}
+
+message ListWorkerRequest {}
+
+message ListWorkerResponse {}
+
+message ShowWorkerRequest {
+  int64 number = 1;
+}
+
+message ShowWorkerResponse {
+  int64 number = 1;
+  int64 summoned = 2;
+}
