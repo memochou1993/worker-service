@@ -1,4 +1,4 @@
-package app
+package worker
 
 import (
 	"log"
@@ -7,8 +7,7 @@ import (
 )
 
 var (
-	mutex   = &sync.Mutex{}
-	service = NewService()
+	mutex = &sync.Mutex{}
 )
 
 // Number 工人號碼
@@ -41,14 +40,8 @@ type Payload struct {
 	Data interface{} `json:"data"`
 }
 
-func init() {
-	// 應徵工人
-	service.Recruit(30)
-}
-
 // 紀錄出勤表
 func (s *Service) record(w Worker) {
-	// 號碼被 client 抽出後, server 需紀錄號碼被抽出次數
 	mutex.Lock()
 	if _, ok := s.Attendance[w.Number]; ok {
 		s.Attendance[w.Number]++
@@ -60,7 +53,6 @@ func (s *Service) record(w Worker) {
 
 // 印出出勤表
 func (s *Service) alert() {
-	// server 於每 100 次抽出時，印出每個號碼被抽取次數
 	s.Summoned++
 	if s.Summoned%100 == 0 {
 		log.Println(s.Attendance)
@@ -69,7 +61,6 @@ func (s *Service) alert() {
 
 // 放入工人
 func (s *Service) Enqueue(w *Worker) bool {
-	// client 抽出的 Delay 須每次隨機不同
 	select {
 	case s.Workers <- NewWorker(w.Number):
 		return true
@@ -80,7 +71,6 @@ func (s *Service) Enqueue(w *Worker) bool {
 
 // 取出工人
 func (s *Service) Dequeue() *Worker {
-	// 號碼被 client 抽出期間，不可再被抽出
 	select {
 	case w := <-s.Workers:
 		s.record(*w)
@@ -92,8 +82,7 @@ func (s *Service) Dequeue() *Worker {
 }
 
 // 應徵工人
-func (s *Service) Recruit(n int) {
-	// server 須於被要求時，隨機決定被抽出的尚存號碼實體，不可預先排序
+func (s *Service) Recruit(n int) *Service {
 	wg := sync.WaitGroup{}
 	wg.Add(n)
 	for i := 1; i <= n; i++ {
@@ -103,6 +92,7 @@ func (s *Service) Recruit(n int) {
 		}(i)
 	}
 	wg.Wait()
+	return s
 }
 
 // 建立新服務

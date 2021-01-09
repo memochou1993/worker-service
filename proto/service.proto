@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = ".;hello";
+
+service Service {
+  rpc GetWorker (GetWorkerRequest) returns (GetWorkerResponse) {}
+  rpc PutWorker (PutWorkerRequest) returns (PutWorkerResponse) {}
+}
+
+message GetWorkerRequest {}
+
+message GetWorkerResponse {
+  int64 number = 1;
+  int64 delay = 2;
+}
+
+message PutWorkerRequest {
+  int64 number = 1;
+}
+
+message PutWorkerResponse {}
