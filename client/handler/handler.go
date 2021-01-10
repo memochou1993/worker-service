@@ -121,7 +121,7 @@ func ShowWorker(w http.ResponseWriter, r *http.Request) {
 func SummonWorkersSync(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 
-	times := 1000
+	times := 100
 	for i := 0; i < times; i++ {
 		summon(context.Background())
 	}
@@ -133,7 +133,7 @@ func SummonWorkersSync(w http.ResponseWriter, r *http.Request) {
 func SummonWorkersAsync(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 
-	times := 1000
+	times := 100
 	wg := sync.WaitGroup{}
 	wg.Add(times)
 	for i := 0; i < times; i++ {
