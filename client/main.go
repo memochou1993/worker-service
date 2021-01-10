@@ -32,7 +32,7 @@ func main() {
 	client = gw.NewServiceClient(conn)
 
 	for i := 0; i < 100; i++ {
-		summon(ctx)
+		summon(context.Background())
 	}
 }
 
@@ -45,13 +45,9 @@ func summon(ctx context.Context) {
 		return
 	}
 
-	if ctx.Err() != nil {
-		return
-	}
-
 	// 等待
 	if s.Code() == codes.NotFound {
-		time.Sleep(time.Microsecond)
+		time.Sleep(time.Second)
 		log.Println("retrying...")
 		summon(ctx)
 		return
