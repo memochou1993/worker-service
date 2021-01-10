@@ -11,10 +11,12 @@ var (
 	ws = NewService().Recruit(30)
 )
 
+// Server 服務
 type Server struct {
 	gw.UnimplementedServiceServer
 }
 
+// GetWorker 取出工人
 func (s *Server) GetWorker(ctx context.Context, r *gw.GetWorkerRequest) (*gw.GetWorkerResponse, error) {
 	w := ws.Dequeue()
 	if w == nil {
@@ -23,11 +25,13 @@ func (s *Server) GetWorker(ctx context.Context, r *gw.GetWorkerRequest) (*gw.Get
 	return &gw.GetWorkerResponse{Worker: &gw.Worker{Number: int64(w.Number), Delay: w.Delay}}, nil
 }
 
+// PutWorker 放回工人
 func (s *Server) PutWorker(ctx context.Context, r *gw.PutWorkerRequest) (*gw.PutWorkerResponse, error) {
 	ws.Enqueue(NewWorker(Number(r.Number)))
 	return &gw.PutWorkerResponse{}, nil
 }
 
+// ListWorker 列出工人
 func (s *Server) ListWorker(ctx context.Context, r *gw.ListWorkerRequest) (*gw.ListWorkerResponse, error) {
 	var records []*gw.Record
 	for number, summoned := range ws.Attendance {
@@ -36,6 +40,7 @@ func (s *Server) ListWorker(ctx context.Context, r *gw.ListWorkerRequest) (*gw.L
 	return &gw.ListWorkerResponse{Records: records}, nil
 }
 
+// ShowWorker 查看工人
 func (s *Server) ShowWorker(ctx context.Context, r *gw.ShowWorkerRequest) (*gw.ShowWorkerResponse, error) {
 	n := r.Number
 	if _, ok := ws.Attendance[Number(n)]; !ok {

@@ -10,26 +10,26 @@ var (
 	mutex = &sync.Mutex{}
 )
 
-// 工人號碼
+// Number 工人號碼
 type Number int64
 
-// 工人被傳喚次數
+// Summoned 工人被傳喚次數
 type Summoned int64
 
-// 服務
+// Service 服務
 type Service struct {
 	Workers    chan *Worker
 	Attendance map[Number]Summoned
 	Summoned
 }
 
-// 工人
+// Worker 工人
 type Worker struct {
 	Number `json:"Number"`
 	Delay  int64 `json:"delay"`
 }
 
-// 放入工人
+// Enqueue 放入工人
 func (s *Service) Enqueue(w *Worker) bool {
 	select {
 	case s.Workers <- NewWorker(w.Number):
@@ -39,7 +39,7 @@ func (s *Service) Enqueue(w *Worker) bool {
 	}
 }
 
-// 取出工人
+// Dequeue 取出工人
 func (s *Service) Dequeue() *Worker {
 	select {
 	case w := <-s.Workers:
@@ -50,7 +50,7 @@ func (s *Service) Dequeue() *Worker {
 	}
 }
 
-// 應徵工人
+// Recruit 應徵工人
 func (s *Service) Recruit(n int) *Service {
 	wg := sync.WaitGroup{}
 	wg.Add(n)
@@ -64,7 +64,7 @@ func (s *Service) Recruit(n int) *Service {
 	return s
 }
 
-// 紀錄出勤表
+// log 紀錄出勤表
 func (s *Service) log(w Worker) {
 	mutex.Lock()
 	if _, ok := s.Attendance[w.Number]; ok {
@@ -80,7 +80,7 @@ func (s *Service) log(w Worker) {
 	}
 }
 
-// 建立新服務
+// NewService 建立新服務
 func NewService() *Service {
 	return &Service{
 		Workers:    make(chan *Worker, 30),
@@ -88,7 +88,7 @@ func NewService() *Service {
 	}
 }
 
-// 建立新工人
+// NewWorker 建立新工人
 func NewWorker(n Number) *Worker {
 	return &Worker{
 		Number: n,

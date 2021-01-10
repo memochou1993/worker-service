@@ -69,7 +69,7 @@ func PutWorker(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusNoContent, nil)
 }
 
-// SummonWorker 取出工人並放回工人
+// SummonWorker 傳喚工人
 func SummonWorker(ctx context.Context) {
 	// 取出工人
 	resp, err := Client.GetWorker(ctx, &gw.GetWorkerRequest{})
