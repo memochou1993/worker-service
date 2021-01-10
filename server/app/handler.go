@@ -35,9 +35,11 @@ func (s *Server) PutWorker(ctx context.Context, r *gw.PutWorkerRequest) (*gw.Put
 // ListWorkers 列出工人
 func (s *Server) ListWorkers(ctx context.Context, r *gw.ListWorkersRequest) (*gw.ListWorkersResponse, error) {
 	var records []*gw.Record
+	mutex.Lock()
 	for number, summoned := range ws.Attendance {
 		records = append(records, &gw.Record{Number: float32(number), Summoned: float32(summoned)})
 	}
+	mutex.Unlock()
 	sort.Slice(records, func(i, j int) bool {
 		return records[i].Number < records[j].Number
 	})
@@ -47,9 +49,11 @@ func (s *Server) ListWorkers(ctx context.Context, r *gw.ListWorkersRequest) (*gw
 // ShowWorker 查看工人
 func (s *Server) ShowWorker(ctx context.Context, r *gw.ShowWorkerRequest) (*gw.ShowWorkerResponse, error) {
 	n := r.Number
+	mutex.Lock()
 	if _, ok := ws.Attendance[Number(n)]; !ok {
 		return &gw.ShowWorkerResponse{}, status.Error(codes.NotFound, "")
 	}
+	mutex.Unlock()
 	record := gw.Record{Number: n, Summoned: float32(ws.Attendance[Number(n)])}
 	return &gw.ShowWorkerResponse{Worker: &record}, nil
 }
