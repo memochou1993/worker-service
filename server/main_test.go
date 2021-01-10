@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestFetch(t *testing.T) {
+func TestSummon(t *testing.T) {
 	service := app.NewService().Recruit(30)
 
 	times := 100
@@ -17,7 +17,7 @@ func TestFetch(t *testing.T) {
 	for i := 0; i < times; i++ {
 		go func() {
 			defer wg.Done()
-			fetch(service)
+			summon(service)
 		}()
 	}
 	wg.Wait()
@@ -35,12 +35,12 @@ func TestFetch(t *testing.T) {
 	}
 }
 
-func fetch(s *app.Service) {
+func summon(s *app.Service) {
 	if w := s.Dequeue(); w != nil {
 		time.Sleep(time.Duration(w.Delay) * time.Microsecond)
 		s.Enqueue(w)
 		return
 	}
 	time.Sleep(time.Second)
-	fetch(s)
+	summon(s)
 }
