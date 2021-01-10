@@ -2,23 +2,15 @@ package main
 
 import (
 	"context"
+	"github.com/memochou1993/worker-server/client/handler"
 	gw "github.com/memochou1993/worker-server/gen"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"testing"
-	"time"
 )
 
 func TestGetWorker(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	conn := NewClientConn(ctx, target)
-	defer conn.Close()
-
-	client = gw.NewServiceClient(conn)
-
-	_, err := client.GetWorker(context.Background(), &gw.GetWorkerRequest{})
+	_, err := handler.Client.GetWorker(context.Background(), &gw.GetWorkerRequest{})
 	s, ok := status.FromError(err)
 	if !ok {
 		t.Fatal(err.Error())
@@ -29,16 +21,7 @@ func TestGetWorker(t *testing.T) {
 }
 
 func TestPutWorker(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	conn := NewClientConn(ctx, target)
-	defer conn.Close()
-
-	client = gw.NewServiceClient(conn)
-
-	_, err := client.PutWorker(context.Background(), &gw.PutWorkerRequest{Number: 100})
-	if err != nil {
+	if _, err := handler.Client.PutWorker(context.Background(), &gw.PutWorkerRequest{Number: 1}); err != nil {
 		t.Fatal(err.Error())
 	}
 }
