@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <title>Worker Service</title>
     <link href="./assets/icon/icon.png" rel="shortcut icon" type="image/png">
+    <link href="./assets/css/app.css" rel="stylesheet">
 </head>
 <body
     hidden
@@ -12,19 +13,34 @@
     <div
         id="app"
     >
-        <button
-            @click="summon()"
-        >
-            Summon
-        </button>
-        <hr>
         <div
             v-for="(worker) in workers"
             :key="worker.number"
+            id="main"
         >
-            ${ worker }
+            <div>
+                <img
+                    :src="`./assets/images/${worker.number % 9 + 1}.png`"
+                    alt="Worker"
+                />
+                <app-progress
+                    :delay="worker.delay"
+                >
+                </app-progress>
+                <div>
+                    ${ worker.number }
+                </div>
+            </div>
         </div>
     </div>
+    <script type="text/x-template" id="app-progress">
+        <progress
+            :value="progress"
+            max="100"
+        >
+            ${ Math.round(progress) }%
+        </progress>
+    </script>
     <script src="https://unpkg.com/vue@next"></script>
     <script src="./assets/js/app.js"></script>
 </body>

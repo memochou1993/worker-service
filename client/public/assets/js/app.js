@@ -1,5 +1,7 @@
-const app = {
-    delimiters: ['${', '}'],
+const delimiters = ['${', '}'];
+
+const main = {
+    delimiters,
     data() {
         return {
             workers: [],
@@ -7,6 +9,9 @@ const app = {
     },
     mounted() {
         document.body.removeAttribute('hidden');
+        document.addEventListener("click", async () => {
+            await this.summon();
+        });
     },
     methods: {
         setWorkers(workers) {
@@ -20,6 +25,7 @@ const app = {
             this.setWorkers([...this.workers, worker]);
             await (() => new Promise((resolve) => setTimeout(() => resolve(), worker.delay * 1000)))();
             await this.putWorker(worker);
+            await (() => new Promise((resolve) => setTimeout(() => resolve(), 100)))();
             this.setWorkers(this.workers.filter(w => w.number !== worker.number));
         },
         fetchWorker() {
@@ -40,4 +46,34 @@ const app = {
     },
 };
 
-Vue.createApp(app).mount('#app');
+const progress = {
+    delimiters,
+    template: '#app-progress',
+    props: [
+        'delay',
+    ],
+    data() {
+        return {
+            timer: null,
+            progress: 0,
+        };
+    },
+    mounted() {
+        this.setTimer(setInterval(() => {
+            this.progress += 100 / this.delay;
+        }, 1000));
+    },
+    methods: {
+        setTimer(timer) {
+            this.timer = timer;
+        },
+    },
+    unmounted() {
+        clearInterval(this.timer);
+    },
+};
+
+Vue
+    .createApp(main)
+    .component('app-progress', progress)
+    .mount('#app');

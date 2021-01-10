@@ -4,6 +4,7 @@ import (
 	"log"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 var (
@@ -90,8 +91,9 @@ func NewService() *Service {
 
 // NewWorker 建立新工人
 func NewWorker(n Number) *Worker {
+	rand.Seed(time.Now().UnixNano())
 	return &Worker{
 		Number: n,
-		Delay:  int64(rand.Intn(10)),
+		Delay:  int64(rand.Intn(11)),
 	}
 }
