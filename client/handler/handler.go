@@ -65,7 +65,7 @@ func PutWorker(w http.ResponseWriter, r *http.Request) {
 
 	var req gw.PutWorkerRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response(w, http.StatusInternalServerError, nil)
+		response(w, http.StatusBadRequest, nil)
 		return
 	}
 	if _, err := Client.PutWorker(context.Background(), &req); err != nil {
@@ -93,13 +93,13 @@ func ListWorkers(w http.ResponseWriter, r *http.Request) {
 func ShowWorker(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 
-	n := mux.Vars(r)["n"]
-	number, err := strconv.Atoi(n)
+	n, err := strconv.Atoi(mux.Vars(r)["n"])
 	if err != nil {
-		response(w, http.StatusInternalServerError, nil)
+		response(w, http.StatusNotFound, nil)
+		return
 	}
 
-	resp, err := Client.ShowWorker(context.Background(), &gw.ShowWorkerRequest{Number: float32(number)})
+	resp, err := Client.ShowWorker(context.Background(), &gw.ShowWorkerRequest{Number: float32(n)})
 	s, ok := status.FromError(err)
 	if !ok {
 		response(w, http.StatusInternalServerError, nil)
@@ -162,7 +162,7 @@ func summon(ctx context.Context) {
 	// 重試
 	if s.Code() != codes.OK {
 		time.Sleep(time.Second)
-		log.Println("retrying...")
+		log.Println("Retrying...")
 		summon(ctx)
 		return
 	}
@@ -174,7 +174,7 @@ func summon(ctx context.Context) {
 	// 放回工人
 	if _, err = Client.PutWorker(ctx, &gw.PutWorkerRequest{Number: resp.Worker.Number}); err != nil {
 		time.Sleep(time.Second)
-		log.Println("retrying...")
+		log.Println("Retrying...")
 		summon(ctx)
 		return
 	}

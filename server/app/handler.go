@@ -28,6 +28,9 @@ func (s *Server) GetWorker(ctx context.Context, r *gw.GetWorkerRequest) (*gw.Get
 
 // PutWorker 放回工人
 func (s *Server) PutWorker(ctx context.Context, r *gw.PutWorkerRequest) (*gw.PutWorkerResponse, error) {
+	if r.Number < 1 {
+		return &gw.PutWorkerResponse{}, status.Error(codes.InvalidArgument, "")
+	}
 	ws.Enqueue(NewWorker(Number(r.Number)))
 	return &gw.PutWorkerResponse{}, nil
 }
@@ -48,12 +51,13 @@ func (s *Server) ListWorkers(ctx context.Context, r *gw.ListWorkersRequest) (*gw
 
 // ShowWorker 查看工人
 func (s *Server) ShowWorker(ctx context.Context, r *gw.ShowWorkerRequest) (*gw.ShowWorkerResponse, error) {
-	n := r.Number
+	n := Number(r.Number)
 	mutex.Lock()
-	if _, ok := ws.Attendance[Number(n)]; !ok {
+	if _, ok := ws.Attendance[n]; !ok {
+		mutex.Unlock()
 		return &gw.ShowWorkerResponse{}, status.Error(codes.NotFound, "")
 	}
+	record := gw.Record{Number: float32(n), Summoned: float32(ws.Attendance[n])}
 	mutex.Unlock()
-	record := gw.Record{Number: n, Summoned: float32(ws.Attendance[Number(n)])}
 	return &gw.ShowWorkerResponse{Worker: &record}, nil
 }
