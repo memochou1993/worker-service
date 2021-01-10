@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	gw "github.com/memochou1993/worker-server/gen"
+	gw "github.com/memochou1993/worker-service/gen"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

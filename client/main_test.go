@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"github.com/memochou1993/worker-server/client/handler"
-	gw "github.com/memochou1993/worker-server/gen"
+	"github.com/memochou1993/worker-service/client/handler"
+	gw "github.com/memochou1993/worker-service/gen"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"testing"

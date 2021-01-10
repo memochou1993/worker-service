@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/memochou1993/worker-server/server/app"
+	"github.com/memochou1993/worker-service/server/app"
 	"sync"
 	"testing"
 	"time"

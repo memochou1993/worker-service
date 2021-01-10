@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	gw "github.com/memochou1993/worker-server/gen"
+	gw "github.com/memochou1993/worker-service/gen"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"sort"

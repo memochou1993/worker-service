@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/memochou1993/worker-server/client/handler"
+	"github.com/memochou1993/worker-service/client/handler"
 	"log"
 	"net/http"
 )

@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	gw "github.com/memochou1993/worker-server/gen"
-	"github.com/memochou1993/worker-server/server/app"
+	gw "github.com/memochou1993/worker-service/gen"
+	"github.com/memochou1993/worker-service/server/app"
 	"google.golang.org/grpc"
 	"log"
 	"net"

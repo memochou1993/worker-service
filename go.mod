@@ -1,4 +1,4 @@
-module github.com/memochou1993/worker-server
+module github.com/memochou1993/worker-service
 
 go 1.15
 
