@@ -26,7 +26,6 @@ func grpcServer() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-
 	s := grpc.NewServer()
 	gw.RegisterServiceServer(s, new(app.Server))
 	if err := s.Serve(ln); err != nil {
