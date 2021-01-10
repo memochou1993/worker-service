@@ -72,14 +72,16 @@ func PutWorker(w http.ResponseWriter, r *http.Request) {
 func SummonWorker(ctx context.Context) {
 	// 取出工人
 	resp, err := Client.GetWorker(ctx, &gw.GetWorkerRequest{})
+
+	// 檢查錯誤
 	s, ok := status.FromError(err)
 	if !ok {
 		log.Println(err.Error())
 		return
 	}
 
-	// 等待
-	if s.Code() == codes.NotFound {
+	// 重試
+	if s.Code() != codes.OK {
 		time.Sleep(time.Second)
 		log.Println("retrying...")
 		SummonWorker(ctx)
@@ -92,8 +94,20 @@ func SummonWorker(ctx context.Context) {
 
 	// 放回工人
 	_, err = Client.PutWorker(ctx, &gw.PutWorkerRequest{Number: resp.Worker.Number})
-	if err != nil {
-		log.Fatalln(err.Error())
+
+	// 檢查錯誤
+	s, ok = status.FromError(err)
+	if !ok {
+		log.Println(err.Error())
+		return
+	}
+
+	// 重試
+	if s.Code() != codes.OK {
+		time.Sleep(time.Second)
+		log.Println("retrying...")
+		SummonWorker(ctx)
+		return
 	}
 }
 
