@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"github.com/gorilla/mux"
 	gw "github.com/memochou1993/worker-server/gen"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -10,6 +11,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
+	"sync"
 	"time"
 )
 
@@ -47,6 +50,10 @@ func GetWorker(w http.ResponseWriter, r *http.Request) {
 		response(w, http.StatusNotFound, nil)
 		return
 	}
+	if s.Code() != codes.OK {
+		response(w, http.StatusInternalServerError, nil)
+		return
+	}
 	log.Printf("Number: %d, Delay: %d", resp.Worker.Number, resp.Worker.Delay)
 
 	response(w, http.StatusOK, resp)
@@ -58,18 +65,90 @@ func PutWorker(w http.ResponseWriter, r *http.Request) {
 
 	var req gw.PutWorkerRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response(w, http.StatusInternalServerError, nil)
 		return
 	}
 	if _, err := Client.PutWorker(context.Background(), &req); err != nil {
-		log.Fatalln(err.Error())
+		response(w, http.StatusInternalServerError, nil)
+		return
 	}
 
 	response(w, http.StatusNoContent, nil)
 }
 
-// SummonWorker 傳喚工人
-func SummonWorker(ctx context.Context) {
+// ListWorkers 列出工人
+func ListWorkers(w http.ResponseWriter, r *http.Request) {
+	defer closeBody(r)
+
+	resp, err := Client.ListWorkers(context.Background(), &gw.ListWorkersRequest{})
+	if err != nil {
+		response(w, http.StatusInternalServerError, nil)
+		return
+	}
+
+	response(w, http.StatusOK, resp)
+}
+
+// ShowWorker 查看工人
+func ShowWorker(w http.ResponseWriter, r *http.Request) {
+	defer closeBody(r)
+
+	n := mux.Vars(r)["n"]
+	number, err := strconv.Atoi(n)
+	if err != nil {
+		response(w, http.StatusInternalServerError, nil)
+	}
+
+	resp, err := Client.ShowWorker(context.Background(), &gw.ShowWorkerRequest{Number: int64(number)})
+	s, ok := status.FromError(err)
+	if !ok {
+		response(w, http.StatusInternalServerError, nil)
+		return
+	}
+	if s.Code() == codes.NotFound {
+		response(w, http.StatusNotFound, nil)
+		return
+	}
+	if s.Code() != codes.OK {
+		response(w, http.StatusInternalServerError, nil)
+		return
+	}
+
+	response(w, http.StatusOK, resp)
+}
+
+// SummonWorker 同時傳喚工人
+func SummonWorker(w http.ResponseWriter, r *http.Request) {
+	defer closeBody(r)
+
+	times := 100
+
+	wg := sync.WaitGroup{}
+	wg.Add(times)
+	for i := 0; i < times; i++ {
+		go func() {
+			defer wg.Done()
+			summon(context.Background())
+		}()
+	}
+	wg.Wait()
+
+	resp, err := Client.ListWorkers(context.Background(), &gw.ListWorkersRequest{})
+	s, ok := status.FromError(err)
+	if !ok {
+		response(w, http.StatusInternalServerError, nil)
+		return
+	}
+	if s.Code() != codes.OK {
+		response(w, http.StatusInternalServerError, nil)
+		return
+	}
+
+	response(w, http.StatusOK, resp)
+}
+
+// summon 傳喚工人
+func summon(ctx context.Context) {
 	// 取出工人
 	resp, err := Client.GetWorker(ctx, &gw.GetWorkerRequest{})
 
@@ -84,7 +163,7 @@ func SummonWorker(ctx context.Context) {
 	if s.Code() != codes.OK {
 		time.Sleep(time.Second)
 		log.Println("retrying...")
-		SummonWorker(ctx)
+		summon(ctx)
 		return
 	}
 
@@ -93,20 +172,10 @@ func SummonWorker(ctx context.Context) {
 	log.Printf("Number: %d, Delay: %d", resp.Worker.Number, resp.Worker.Delay)
 
 	// 放回工人
-	_, err = Client.PutWorker(ctx, &gw.PutWorkerRequest{Number: resp.Worker.Number})
-
-	// 檢查錯誤
-	s, ok = status.FromError(err)
-	if !ok {
-		log.Println(err.Error())
-		return
-	}
-
-	// 重試
-	if s.Code() != codes.OK {
+	if _, err = Client.PutWorker(ctx, &gw.PutWorkerRequest{Number: resp.Worker.Number}); err != nil {
 		time.Sleep(time.Second)
 		log.Println("retrying...")
-		SummonWorker(ctx)
+		summon(ctx)
 		return
 	}
 }

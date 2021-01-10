@@ -5,6 +5,7 @@ import (
 	gw "github.com/memochou1993/worker-server/gen"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"sort"
 )
 
 var (
@@ -37,6 +38,9 @@ func (s *Server) ListWorkers(ctx context.Context, r *gw.ListWorkersRequest) (*gw
 	for number, summoned := range ws.Attendance {
 		records = append(records, &gw.Record{Number: int64(number), Summoned: int64(summoned)})
 	}
+	sort.Slice(records, func(i, j int) bool {
+		return records[i].Number < records[j].Number
+	})
 	return &gw.ListWorkersResponse{Workers: records}, nil
 }
 
