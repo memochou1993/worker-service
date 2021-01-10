@@ -29,13 +29,13 @@ service Service {
 }
 
 message Worker {
-  int64 number = 1;
-  int64 delay = 2;
+  float number = 1;
+  float delay = 2;
 }
 
 message Record {
-  int64 number = 1;
-  int64 summoned = 2;
+  float number = 1;
+  float summoned = 2;
 }
 
 message GetWorkerRequest {}
@@ -45,7 +45,7 @@ message GetWorkerResponse {
 }
 
 message PutWorkerRequest {
-  int64 number = 1;
+  float number = 1;
 }
 
 message PutWorkerResponse {}
@@ -57,7 +57,7 @@ message ListWorkersResponse {
 }
 
 message ShowWorkerRequest {
-  int64 number = 1;
+  float number = 1;
 }
 
 message ShowWorkerResponse {

@@ -117,7 +117,7 @@ func request_Service_ShowWorker_0(ctx context.Context, marshaler runtime.Marshal
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "number")
 	}
 
-	protoReq.Number, err = runtime.Int64(val)
+	protoReq.Number, err = runtime.Float32(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "number", err)
 	}
@@ -143,7 +143,7 @@ func local_request_Service_ShowWorker_0(ctx context.Context, marshaler runtime.M
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "number")
 	}
 
-	protoReq.Number, err = runtime.Int64(val)
+	protoReq.Number, err = runtime.Float32(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "number", err)
 	}

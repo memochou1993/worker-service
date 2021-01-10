@@ -23,7 +23,7 @@ func (s *Server) GetWorker(ctx context.Context, r *gw.GetWorkerRequest) (*gw.Get
 	if w == nil {
 		return &gw.GetWorkerResponse{}, status.Error(codes.NotFound, "")
 	}
-	return &gw.GetWorkerResponse{Worker: &gw.Worker{Number: int64(w.Number), Delay: w.Delay}}, nil
+	return &gw.GetWorkerResponse{Worker: &gw.Worker{Number: float32(w.Number), Delay: float32(w.Delay)}}, nil
 }
 
 // PutWorker 放回工人
@@ -36,7 +36,7 @@ func (s *Server) PutWorker(ctx context.Context, r *gw.PutWorkerRequest) (*gw.Put
 func (s *Server) ListWorkers(ctx context.Context, r *gw.ListWorkersRequest) (*gw.ListWorkersResponse, error) {
 	var records []*gw.Record
 	for number, summoned := range ws.Attendance {
-		records = append(records, &gw.Record{Number: int64(number), Summoned: int64(summoned)})
+		records = append(records, &gw.Record{Number: float32(number), Summoned: float32(summoned)})
 	}
 	sort.Slice(records, func(i, j int) bool {
 		return records[i].Number < records[j].Number
@@ -50,6 +50,6 @@ func (s *Server) ShowWorker(ctx context.Context, r *gw.ShowWorkerRequest) (*gw.S
 	if _, ok := ws.Attendance[Number(n)]; !ok {
 		return &gw.ShowWorkerResponse{}, status.Error(codes.NotFound, "")
 	}
-	record := gw.Record{Number: n, Summoned: int64(ws.Attendance[Number(n)])}
+	record := gw.Record{Number: n, Summoned: float32(ws.Attendance[Number(n)])}
 	return &gw.ShowWorkerResponse{Worker: &record}, nil
 }
