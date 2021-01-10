@@ -73,12 +73,11 @@ func (s *Service) log(w Worker) {
 	} else {
 		s.Attendance[w.Number] = 1
 	}
-	mutex.Unlock()
-
 	s.Summoned++
 	if s.Summoned%100 == 0 {
 		log.Println(s.Attendance)
 	}
+	mutex.Unlock()
 }
 
 // NewService 建立新服務

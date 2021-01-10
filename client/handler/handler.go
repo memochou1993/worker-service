@@ -117,12 +117,23 @@ func ShowWorker(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusOK, resp)
 }
 
-// SummonWorker 同時傳喚工人
-func SummonWorker(w http.ResponseWriter, r *http.Request) {
+// SummonWorkersSync 同步傳喚工人
+func SummonWorkersSync(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 
-	times := 100
+	times := 1000
+	for i := 0; i < times; i++ {
+		summon(context.Background())
+	}
 
+	ListWorkers(w, r)
+}
+
+// SummonWorkersAsync 非同步傳喚工人
+func SummonWorkersAsync(w http.ResponseWriter, r *http.Request) {
+	defer closeBody(r)
+
+	times := 1000
 	wg := sync.WaitGroup{}
 	wg.Add(times)
 	for i := 0; i < times; i++ {
@@ -133,18 +144,7 @@ func SummonWorker(w http.ResponseWriter, r *http.Request) {
 	}
 	wg.Wait()
 
-	resp, err := Client.ListWorkers(context.Background(), &gw.ListWorkersRequest{})
-	s, ok := status.FromError(err)
-	if !ok {
-		response(w, http.StatusInternalServerError, nil)
-		return
-	}
-	if s.Code() != codes.OK {
-		response(w, http.StatusInternalServerError, nil)
-		return
-	}
-
-	response(w, http.StatusOK, resp)
+	ListWorkers(w, r)
 }
 
 // summon 傳喚工人
