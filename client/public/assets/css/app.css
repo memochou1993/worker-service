@@ -1,6 +1,7 @@
 html {
     cursor: pointer;
     user-select: none;
+    font-family: "Andale Mono", serif;
 }
 
 body {
@@ -15,6 +16,10 @@ body {
 
 img, progress {
     width: 80%;
+}
+
+#percentage {
+    font-size: 8px;
 }
 
 @media only screen and (max-width: 600px) {

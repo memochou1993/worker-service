@@ -54,22 +54,16 @@ const progress = {
     ],
     data() {
         return {
-            timer: null,
             progress: 0,
         };
     },
     mounted() {
-        this.setTimer(setInterval(() => {
+        const timer = setInterval(() => {
             this.progress += 100 / this.delay;
-        }, 1000));
-    },
-    methods: {
-        setTimer(timer) {
-            this.timer = timer;
-        },
-    },
-    unmounted() {
-        clearInterval(this.timer);
+        }, 1000);
+        setTimeout(() => {
+            clearInterval(timer);
+        }, this.delay * 1000)
     },
 };
 

@@ -23,13 +23,13 @@
                     :src="`./assets/images/${worker.number % 9 + 1}.png`"
                     alt="Worker"
                 />
+                <div>
+                    ${ worker.number }
+                </div>
                 <app-progress
                     :delay="worker.delay"
                 >
                 </app-progress>
-                <div>
-                    ${ worker.number }
-                </div>
             </div>
         </div>
     </div>
@@ -40,6 +40,11 @@
         >
             ${ Math.round(progress) }%
         </progress>
+        <div
+            id="percentage"
+        >
+            ${ Math.round(progress) }%
+        </div>
     </script>
     <script src="https://unpkg.com/vue@next"></script>
     <script src="./assets/js/app.js"></script>
