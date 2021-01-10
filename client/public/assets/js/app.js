@@ -22,10 +22,11 @@ const main = {
             if (!worker) {
                 return;
             }
+            worker.delay = worker.delay || 0;
             this.setWorkers([...this.workers, worker]);
             await (() => new Promise((resolve) => setTimeout(() => resolve(), worker.delay * 1000)))();
             await this.putWorker(worker);
-            await (() => new Promise((resolve) => setTimeout(() => resolve(), 100)))();
+            await (() => new Promise((resolve) => setTimeout(() => resolve(), 500)))();
             this.setWorkers(this.workers.filter(w => w.number !== worker.number));
         },
         fetchWorker() {
@@ -49,9 +50,12 @@ const main = {
 const progress = {
     delimiters,
     template: '#app-progress',
-    props: [
-        'delay',
-    ],
+    props: {
+        delay: {
+            type: Number,
+            required: true,
+        },
+    },
     data() {
         return {
             progress: 0,
@@ -59,11 +63,11 @@ const progress = {
     },
     mounted() {
         const timer = setInterval(() => {
-            this.progress += 100 / this.delay;
+            this.progress++;
         }, 1000);
         setTimeout(() => {
             clearInterval(timer);
-        }, this.delay * 1000)
+        }, this.delay * 1000);
     },
 };
 

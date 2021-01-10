@@ -54,7 +54,7 @@ func GetWorker(w http.ResponseWriter, r *http.Request) {
 		response(w, http.StatusInternalServerError, nil)
 		return
 	}
-	log.Printf("Number: %d, Delay: %d", resp.Worker.Number, resp.Worker.Delay)
+	log.Printf("Number: %d, Delay: %d", int64(resp.Worker.Number), int64(resp.Worker.Delay))
 
 	response(w, http.StatusOK, resp)
 }
@@ -99,7 +99,7 @@ func ShowWorker(w http.ResponseWriter, r *http.Request) {
 		response(w, http.StatusInternalServerError, nil)
 	}
 
-	resp, err := Client.ShowWorker(context.Background(), &gw.ShowWorkerRequest{Number: int64(number)})
+	resp, err := Client.ShowWorker(context.Background(), &gw.ShowWorkerRequest{Number: float32(number)})
 	s, ok := status.FromError(err)
 	if !ok {
 		response(w, http.StatusInternalServerError, nil)
@@ -169,7 +169,7 @@ func summon(ctx context.Context) {
 
 	// 延遲
 	time.Sleep(time.Duration(resp.Worker.Delay) * time.Microsecond)
-	log.Printf("Number: %d, Delay: %d", resp.Worker.Number, resp.Worker.Delay)
+	log.Printf("Number: %d, Delay: %d", int64(resp.Worker.Number), int64(resp.Worker.Delay))
 
 	// 放回工人
 	if _, err = Client.PutWorker(ctx, &gw.PutWorkerRequest{Number: resp.Worker.Number}); err != nil {

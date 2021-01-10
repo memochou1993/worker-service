@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
@@ -35,15 +35,14 @@
     </div>
     <script type="text/x-template" id="app-progress">
         <progress
-            :value="progress"
-            max="100"
+            :max="delay ? delay : 1"
+            :value="delay ? progress : 1"
         >
-            ${ Math.round(progress) }%
         </progress>
         <div
             id="percentage"
         >
-            ${ Math.round(progress) }%
+            ${ progress }/${ delay }
         </div>
     </script>
     <script src="https://unpkg.com/vue@next"></script>
