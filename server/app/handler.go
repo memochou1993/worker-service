@@ -31,13 +31,13 @@ func (s *Server) PutWorker(ctx context.Context, r *gw.PutWorkerRequest) (*gw.Put
 	return &gw.PutWorkerResponse{}, nil
 }
 
-// ListWorker 列出工人
-func (s *Server) ListWorker(ctx context.Context, r *gw.ListWorkerRequest) (*gw.ListWorkerResponse, error) {
+// ListWorkers 列出工人
+func (s *Server) ListWorkers(ctx context.Context, r *gw.ListWorkersRequest) (*gw.ListWorkersResponse, error) {
 	var records []*gw.Record
 	for number, summoned := range ws.Attendance {
 		records = append(records, &gw.Record{Number: int64(number), Summoned: int64(summoned)})
 	}
-	return &gw.ListWorkerResponse{Records: records}, nil
+	return &gw.ListWorkersResponse{Workers: records}, nil
 }
 
 // ShowWorker 查看工人
@@ -47,5 +47,5 @@ func (s *Server) ShowWorker(ctx context.Context, r *gw.ShowWorkerRequest) (*gw.S
 		return &gw.ShowWorkerResponse{}, status.Error(codes.NotFound, "")
 	}
 	record := gw.Record{Number: n, Summoned: int64(ws.Attendance[Number(n)])}
-	return &gw.ShowWorkerResponse{Record: &record}, nil
+	return &gw.ShowWorkerResponse{Worker: &record}, nil
 }

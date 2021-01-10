@@ -83,20 +83,20 @@ func local_request_Service_PutWorker_0(ctx context.Context, marshaler runtime.Ma
 
 }
 
-func request_Service_ListWorker_0(ctx context.Context, marshaler runtime.Marshaler, client ServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListWorkerRequest
+func request_Service_ListWorkers_0(ctx context.Context, marshaler runtime.Marshaler, client ServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListWorkersRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := client.ListWorker(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ListWorkers(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Service_ListWorker_0(ctx context.Context, marshaler runtime.Marshaler, server ServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListWorkerRequest
+func local_request_Service_ListWorkers_0(ctx context.Context, marshaler runtime.Marshaler, server ServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListWorkersRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := server.ListWorker(ctx, &protoReq)
+	msg, err := server.ListWorkers(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -205,18 +205,18 @@ func RegisterServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 
 	})
 
-	mux.Handle("GET", pattern_Service_ListWorker_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Service_ListWorkers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Service/ListWorker")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.Service/ListWorkers")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Service_ListWorker_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Service_ListWorkers_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -224,7 +224,7 @@ func RegisterServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 			return
 		}
 
-		forward_Service_ListWorker_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Service_ListWorkers_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -332,23 +332,23 @@ func RegisterServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 
 	})
 
-	mux.Handle("GET", pattern_Service_ListWorker_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Service_ListWorkers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Service/ListWorker")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.Service/ListWorkers")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Service_ListWorker_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Service_ListWorkers_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Service_ListWorker_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Service_ListWorkers_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -380,7 +380,7 @@ var (
 
 	pattern_Service_PutWorker_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"worker"}, ""))
 
-	pattern_Service_ListWorker_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"workers"}, ""))
+	pattern_Service_ListWorkers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"workers"}, ""))
 
 	pattern_Service_ShowWorker_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"workers", "number"}, ""))
 )
@@ -390,7 +390,7 @@ var (
 
 	forward_Service_PutWorker_0 = runtime.ForwardResponseMessage
 
-	forward_Service_ListWorker_0 = runtime.ForwardResponseMessage
+	forward_Service_ListWorkers_0 = runtime.ForwardResponseMessage
 
 	forward_Service_ShowWorker_0 = runtime.ForwardResponseMessage
 )

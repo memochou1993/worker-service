@@ -16,7 +16,7 @@ service Service {
       body: "*"
     };
   }
-  rpc ListWorker (ListWorkerRequest) returns (ListWorkerResponse) {
+  rpc ListWorkers (ListWorkersRequest) returns (ListWorkersResponse) {
     option (google.api.http) = {
       get: "/workers"
     };
@@ -50,10 +50,10 @@ message PutWorkerRequest {
 
 message PutWorkerResponse {}
 
-message ListWorkerRequest {}
+message ListWorkersRequest {}
 
-message ListWorkerResponse {
-  repeated Record records = 1;
+message ListWorkersResponse {
+  repeated Record workers = 1;
 }
 
 message ShowWorkerRequest {
@@ -61,5 +61,5 @@ message ShowWorkerRequest {
 }
 
 message ShowWorkerResponse {
-  Record record = 1;
+  Record worker = 1;
 }

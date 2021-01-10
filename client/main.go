@@ -15,9 +15,13 @@ func main() {
 	r.HandleFunc("/api/worker", handler.PutWorker).Methods(http.MethodPut)
 	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("client/public/assets/"))))
 
-	for i := 0; i < 100; i++ {
-		handler.SummonWorker(context.Background())
-	}
+	summon(100)
 
 	log.Fatalln(http.ListenAndServe(":80", r))
+}
+
+func summon(times int) {
+	for i := 0; i < times; i++ {
+		handler.SummonWorker(context.Background())
+	}
 }

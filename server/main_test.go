@@ -41,6 +41,6 @@ func fetch(s *app.Service) {
 		s.Enqueue(w)
 		return
 	}
-	time.Sleep(time.Microsecond)
+	time.Sleep(time.Second)
 	fetch(s)
 }

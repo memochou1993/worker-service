@@ -19,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ServiceClient interface {
 	GetWorker(ctx context.Context, in *GetWorkerRequest, opts ...grpc.CallOption) (*GetWorkerResponse, error)
 	PutWorker(ctx context.Context, in *PutWorkerRequest, opts ...grpc.CallOption) (*PutWorkerResponse, error)
-	ListWorker(ctx context.Context, in *ListWorkerRequest, opts ...grpc.CallOption) (*ListWorkerResponse, error)
+	ListWorkers(ctx context.Context, in *ListWorkersRequest, opts ...grpc.CallOption) (*ListWorkersResponse, error)
 	ShowWorker(ctx context.Context, in *ShowWorkerRequest, opts ...grpc.CallOption) (*ShowWorkerResponse, error)
 }
 
@@ -49,9 +49,9 @@ func (c *serviceClient) PutWorker(ctx context.Context, in *PutWorkerRequest, opt
 	return out, nil
 }
 
-func (c *serviceClient) ListWorker(ctx context.Context, in *ListWorkerRequest, opts ...grpc.CallOption) (*ListWorkerResponse, error) {
-	out := new(ListWorkerResponse)
-	err := c.cc.Invoke(ctx, "/Service/ListWorker", in, out, opts...)
+func (c *serviceClient) ListWorkers(ctx context.Context, in *ListWorkersRequest, opts ...grpc.CallOption) (*ListWorkersResponse, error) {
+	out := new(ListWorkersResponse)
+	err := c.cc.Invoke(ctx, "/Service/ListWorkers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (c *serviceClient) ShowWorker(ctx context.Context, in *ShowWorkerRequest, o
 type ServiceServer interface {
 	GetWorker(context.Context, *GetWorkerRequest) (*GetWorkerResponse, error)
 	PutWorker(context.Context, *PutWorkerRequest) (*PutWorkerResponse, error)
-	ListWorker(context.Context, *ListWorkerRequest) (*ListWorkerResponse, error)
+	ListWorkers(context.Context, *ListWorkersRequest) (*ListWorkersResponse, error)
 	ShowWorker(context.Context, *ShowWorkerRequest) (*ShowWorkerResponse, error)
 	mustEmbedUnimplementedServiceServer()
 }
@@ -88,8 +88,8 @@ func (UnimplementedServiceServer) GetWorker(context.Context, *GetWorkerRequest) 
 func (UnimplementedServiceServer) PutWorker(context.Context, *PutWorkerRequest) (*PutWorkerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PutWorker not implemented")
 }
-func (UnimplementedServiceServer) ListWorker(context.Context, *ListWorkerRequest) (*ListWorkerResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListWorker not implemented")
+func (UnimplementedServiceServer) ListWorkers(context.Context, *ListWorkersRequest) (*ListWorkersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListWorkers not implemented")
 }
 func (UnimplementedServiceServer) ShowWorker(context.Context, *ShowWorkerRequest) (*ShowWorkerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ShowWorker not implemented")
@@ -143,20 +143,20 @@ func _Service_PutWorker_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Service_ListWorker_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListWorkerRequest)
+func _Service_ListWorkers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListWorkersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ServiceServer).ListWorker(ctx, in)
+		return srv.(ServiceServer).ListWorkers(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Service/ListWorker",
+		FullMethod: "/Service/ListWorkers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServiceServer).ListWorker(ctx, req.(*ListWorkerRequest))
+		return srv.(ServiceServer).ListWorkers(ctx, req.(*ListWorkersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -192,8 +192,8 @@ var _Service_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Service_PutWorker_Handler,
 		},
 		{
-			MethodName: "ListWorker",
-			Handler:    _Service_ListWorker_Handler,
+			MethodName: "ListWorkers",
+			Handler:    _Service_ListWorkers_Handler,
 		},
 		{
 			MethodName: "ShowWorker",

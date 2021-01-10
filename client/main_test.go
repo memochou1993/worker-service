@@ -7,10 +7,14 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"testing"
+	"time"
 )
 
 func TestGetWorker(t *testing.T) {
-	_, err := handler.Client.GetWorker(context.Background(), &gw.GetWorkerRequest{})
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	_, err := handler.Client.GetWorker(ctx, &gw.GetWorkerRequest{})
 	s, ok := status.FromError(err)
 	if !ok {
 		t.Fatal(err.Error())
@@ -21,7 +25,10 @@ func TestGetWorker(t *testing.T) {
 }
 
 func TestPutWorker(t *testing.T) {
-	if _, err := handler.Client.PutWorker(context.Background(), &gw.PutWorkerRequest{Number: 1}); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	if _, err := handler.Client.PutWorker(ctx, &gw.PutWorkerRequest{Number: 1}); err != nil {
 		t.Fatal(err.Error())
 	}
 }

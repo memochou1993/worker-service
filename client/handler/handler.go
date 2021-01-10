@@ -22,11 +22,10 @@ var (
 )
 
 func init() {
-	Client = gw.NewServiceClient(newClientConn(context.Background(), Target))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 
-	for i := 0; i < 100; i++ {
-		SummonWorker(context.Background())
-	}
+	Client = gw.NewServiceClient(newClientConn(ctx, Target))
 }
 
 // Index 渲染首頁
