@@ -1,48 +1,52 @@
 package main
 
 import (
-	"sync"
-	"testing"
-	"time"
-
 	"github.com/memochou1993/worker-service/server/app"
 	"github.com/memochou1993/worker-service/server/app/options"
+	"sync"
+	"testing"
 )
 
-func TestSummon(t *testing.T) {
-	service := app.NewService(options.Service().SetMaxWorkers(50))
+func TestEnqueue(t *testing.T) {
+	number := 50
+	service := app.NewService(options.Service().SetMaxWorkers(number))
 
-	times := 100
+	for i := 0; i < number; i++ {
+		<-service.Workers
+	}
 
 	wg := sync.WaitGroup{}
-	wg.Add(times)
-	for i := 0; i < times; i++ {
+	wg.Add(number)
+	for i := 0; i < number; i++ {
+		go func(i int) {
+			defer wg.Done()
+			service.Enqueue(app.NewWorker(app.Number(i + 1)))
+		}(i)
+	}
+	wg.Wait()
+
+	if len(service.Workers) != number {
+		t.Fail()
+	}
+}
+
+func TestDequeue(t *testing.T) {
+	number := 50
+	service := app.NewService(options.Service().SetMaxWorkers(number))
+
+	wg := sync.WaitGroup{}
+	wg.Add(number)
+	for i := 0; i < number; i++ {
 		go func() {
 			defer wg.Done()
-			summon(service)
+			if w := service.Dequeue(); w == nil {
+				t.Fail()
+			}
 		}()
 	}
 	wg.Wait()
 
-	summoned := app.Summoned(0)
-	for _, v := range service.Attendance {
-		summoned += v
+	if len(service.Workers) != 0 {
+		t.Fail()
 	}
-	if summoned != app.Summoned(times) {
-		t.Fatal()
-	}
-
-	if service.Summoned != app.Summoned(times) {
-		t.Fatal()
-	}
-}
-
-func summon(s *app.Service) {
-	if w := s.Dequeue(); w != nil {
-		time.Sleep(time.Duration(w.Delay) * time.Microsecond)
-		s.Enqueue(w)
-		return
-	}
-	time.Sleep(time.Second)
-	summon(s)
 }
