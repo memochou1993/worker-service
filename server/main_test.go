@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/memochou1993/worker-service/server/app"
-	"github.com/memochou1993/worker-service/server/options"
+	"github.com/memochou1993/worker-service/server/app/options"
 )
 
 func TestSummon(t *testing.T) {

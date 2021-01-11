@@ -9,7 +9,7 @@ import (
 
 	gw "github.com/memochou1993/worker-service/gen"
 	"github.com/memochou1993/worker-service/server/app"
-	"github.com/memochou1993/worker-service/server/options"
+	"github.com/memochou1993/worker-service/server/app/options"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

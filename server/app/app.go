@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/memochou1993/worker-service/server/options"
+	"github.com/memochou1993/worker-service/server/app/options"
 )
 
 var (
