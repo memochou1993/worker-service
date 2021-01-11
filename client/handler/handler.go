@@ -185,7 +185,7 @@ func summon(ctx context.Context) {
 
 func closeBody(r *http.Request) {
 	if err := r.Body.Close(); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err.Error())
 	}
 }
 
@@ -203,18 +203,18 @@ func render(w http.ResponseWriter, name string) {
 	box := packr.New("public", "../public")
 	html, err := box.FindString(fmt.Sprintf("%s.html", name))
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err.Error())
 	}
 	tmpl, err := template.New(name).Parse(html)
 	if err := tmpl.Execute(w, nil); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err.Error())
 	}
 }
 
 func newClientConn(ctx context.Context, addr string) *grpc.ClientConn {
 	conn, err := grpc.DialContext(ctx, addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	return conn

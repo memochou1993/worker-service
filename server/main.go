@@ -25,13 +25,13 @@ func main() {
 func grpcServer() {
 	ln, err := net.Listen("tcp", grpcServerEndpoint)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err.Error())
 	}
 	s := grpc.NewServer()
 	gw.RegisterServiceServer(s, new(handler.Server))
 	log.Printf("Worker service gRPC server started: http://localhost%s", grpcServerEndpoint)
 	if err := s.Serve(ln); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err.Error())
 	}
 }
 
@@ -40,8 +40,8 @@ func httpServer() {
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	if err := gw.RegisterServiceHandlerFromEndpoint(ctx, mux, grpcServerEndpoint, opts); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err.Error())
 	}
 	log.Printf("Worker service HTTP server started: http://localhost%s", httpServerEndpoint)
-	log.Fatalln(http.ListenAndServe(httpServerEndpoint, mux))
+	log.Fatal(http.ListenAndServe(httpServerEndpoint, mux))
 }

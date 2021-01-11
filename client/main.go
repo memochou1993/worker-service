@@ -26,5 +26,5 @@ func main() {
 	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(box)))
 
 	log.Printf("Worker service HTTP client started: http://localhost%s", addr)
-	log.Fatalln(http.ListenAndServe(addr, r))
+	log.Fatal(http.ListenAndServe(addr, r))
 }
