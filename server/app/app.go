@@ -4,6 +4,7 @@ import (
 	"log"
 	"math/rand"
 	"sync"
+	"time"
 
 	"github.com/memochou1993/worker-service/server/app/options"
 )
@@ -54,9 +55,16 @@ func (s *Service) Dequeue() *Worker {
 
 // recruit 填充工人
 func (s *Service) recruit(n int) {
+	wg := sync.WaitGroup{}
+	wg.Add(n)
 	for i := 1; i <= n; i++ {
-		s.Workers <- NewWorker(Number(i), options.Worker().SetMaxDelay(10))
+		go func(i int) {
+			defer wg.Done()
+			time.Sleep(time.Microsecond)
+			s.Workers <- NewWorker(Number(i), options.Worker().SetMaxDelay(10))
+		}(i)
 	}
+	wg.Wait()
 }
 
 // log 紀錄出勤表
