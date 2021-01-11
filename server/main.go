@@ -29,7 +29,7 @@ func grpcServer() {
 	}
 	s := grpc.NewServer()
 	gw.RegisterServiceServer(s, new(handler.Server))
-	log.Printf("\033[1;33mWorker service gRPC server started: http://localhost%s\033[0m", grpcServerEndpoint)
+	log.Printf("Worker service gRPC server started: http://localhost%s", grpcServerEndpoint)
 	if err := s.Serve(ln); err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -42,6 +42,6 @@ func httpServer() {
 	if err := gw.RegisterServiceHandlerFromEndpoint(ctx, mux, grpcServerEndpoint, opts); err != nil {
 		log.Fatalln(err.Error())
 	}
-	log.Printf("\033[1;33mWorker service HTTP server started: http://localhost%s\033[0m", httpServerEndpoint)
+	log.Printf("Worker service HTTP server started: http://localhost%s", httpServerEndpoint)
 	log.Fatalln(http.ListenAndServe(httpServerEndpoint, mux))
 }

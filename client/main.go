@@ -23,6 +23,6 @@ func main() {
 	r.HandleFunc("/api/summon/workers/async", handler.SummonWorkersAsync).Methods(http.MethodGet)
 	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("client/public/assets/"))))
 
-	log.Printf("\033[1;33mWorker service HTTP client started: http://localhost%s\033[0m", addr)
+	log.Printf("Worker service HTTP client started: http://localhost%s", addr)
 	log.Fatalln(http.ListenAndServe(addr, r))
 }
