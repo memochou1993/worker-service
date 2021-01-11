@@ -27,3 +27,8 @@ img, progress {
         width: 25vw;
     }
 }
+
+@font-face {
+    font-family: "Andale Mono";
+    src: url(../fonts/Andale-Mono.ttf);
+}
