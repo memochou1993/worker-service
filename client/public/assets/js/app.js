@@ -8,8 +8,9 @@ const main = {
         };
     },
     mounted() {
+        window.onbeforeunload = async () => {};
         document.body.removeAttribute('hidden');
-        document.addEventListener("click", async () => {
+        document.addEventListener('click', async () => {
             await this.summon();
         });
     },
@@ -41,7 +42,10 @@ const main = {
                 method: 'PUT',
             };
             return fetch('api/worker', init)
-                .then();
+                .then()
+                .catch((err) => {
+                    console.log(err);
+                });
         },
         delay(milliseconds) {
             return new Promise((resolve) => setTimeout(() => resolve(), milliseconds));
