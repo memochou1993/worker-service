@@ -118,29 +118,29 @@ func ShowWorker(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusOK, resp)
 }
 
-// SummonWorkersSync 同步傳喚工人
-func SummonWorkersSync(w http.ResponseWriter, r *http.Request) {
+// SummonWorkers 傳喚工人
+func SummonWorkers(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 
-	times := 100
-	for i := 0; i < times; i++ {
-		summon(context.Background())
+	a, err := strconv.Atoi(mux.Vars(r)["a"])
+	if err != nil {
+		response(w, http.StatusNotFound, nil)
+		return
+	}
+	s, err := strconv.Atoi(mux.Vars(r)["s"])
+	if err != nil {
+		response(w, http.StatusNotFound, nil)
+		return
 	}
 
-	ListWorkers(w, r)
-}
-
-// SummonWorkersAsync 非同步傳喚工人
-func SummonWorkersAsync(w http.ResponseWriter, r *http.Request) {
-	defer closeBody(r)
-
-	times := 100
 	wg := sync.WaitGroup{}
-	wg.Add(times)
-	for i := 0; i < times; i++ {
+	wg.Add(a)
+	for i := 0; i < a; i++ {
 		go func() {
 			defer wg.Done()
-			summon(context.Background())
+			for i := 0; i < s; i++ {
+				summon(context.Background())
+			}
 		}()
 	}
 	wg.Wait()

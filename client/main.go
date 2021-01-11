@@ -19,8 +19,7 @@ func main() {
 	r.HandleFunc("/api/worker", handler.PutWorker).Methods(http.MethodPut)
 	r.HandleFunc("/api/workers", handler.ListWorkers).Methods(http.MethodGet)
 	r.HandleFunc("/api/workers/{n}", handler.ShowWorker).Methods(http.MethodGet)
-	r.HandleFunc("/api/summon/workers/sync", handler.SummonWorkersSync).Methods(http.MethodGet)
-	r.HandleFunc("/api/summon/workers/async", handler.SummonWorkersAsync).Methods(http.MethodGet)
+	r.HandleFunc("/api/workers/summon/async/{a}/sync/{s}", handler.SummonWorkers).Methods(http.MethodGet)
 	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("client/public/assets/"))))
 
 	log.Printf("Worker service HTTP client started: http://localhost%s", addr)
