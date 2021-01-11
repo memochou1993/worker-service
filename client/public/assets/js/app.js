@@ -24,9 +24,8 @@ const main = {
             }
             worker.delay = worker.delay || 0;
             this.setWorkers([...this.workers, worker]);
-            await (() => new Promise((resolve) => setTimeout(() => resolve(), worker.delay * 1000)))();
+            await this.delay(worker.delay * 1000 + 250);
             await this.putWorker(worker);
-            await (() => new Promise((resolve) => setTimeout(() => resolve(), 500)))();
             this.setWorkers(this.workers.filter(w => w.number !== worker.number));
         },
         fetchWorker() {
@@ -43,6 +42,9 @@ const main = {
             };
             return fetch('api/worker', init)
                 .then();
+        },
+        delay(milliseconds) {
+            return new Promise((resolve) => setTimeout(() => resolve(), milliseconds));
         },
     },
 };
