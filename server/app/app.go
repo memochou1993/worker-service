@@ -4,6 +4,8 @@ import (
 	"log"
 	"math/rand"
 	"sync"
+
+	"github.com/memochou1993/worker-service/server/options"
 )
 
 var (
@@ -22,17 +24,6 @@ type Worker struct {
 	Delay  int64 `json:"delay"`
 }
 
-// ServiceOptions 服務選項
-type ServiceOptions struct {
-	MaxWorkers int
-}
-
-// SetMaxWorkers 設置工人最大數量
-func (s *ServiceOptions) SetMaxWorkers(max int) *ServiceOptions {
-	s.MaxWorkers = max
-	return s
-}
-
 // Service 服務
 type Service struct {
 	Workers    chan *Worker
@@ -43,7 +34,7 @@ type Service struct {
 // Enqueue 放入工人
 func (s *Service) Enqueue(w *Worker) bool {
 	select {
-	case s.Workers <- NewWorker(w.Number):
+	case s.Workers <- NewWorker(w.Number, options.Worker().SetMaxDelay(10)):
 		return true
 	default:
 		return false
@@ -64,7 +55,7 @@ func (s *Service) Dequeue() *Worker {
 // recruit 填充工人
 func (s *Service) recruit(n int) {
 	for i := 1; i <= n; i++ {
-		s.Workers <- NewWorker(Number(i))
+		s.Workers <- NewWorker(Number(i), options.Worker().SetMaxDelay(10))
 	}
 }
 
@@ -83,27 +74,22 @@ func (s *Service) log(w Worker) {
 	mutex.Unlock()
 }
 
-// NewServiceOptions 建立新服務選項
-func NewServiceOptions() *ServiceOptions {
-	return &ServiceOptions{
-		MaxWorkers: 10,
-	}
-}
-
 // NewService 建立新服務
-func NewService(opts *ServiceOptions) *Service {
+func NewService(opts ...*options.ServiceOptions) *Service {
+	sOpts := options.MergeServiceOptions(opts...)
 	s := &Service{
-		Workers:    make(chan *Worker, opts.MaxWorkers),
+		Workers:    make(chan *Worker, *sOpts.MaxWorkers),
 		Attendance: make(map[Number]Summoned),
 	}
-	s.recruit(opts.MaxWorkers)
+	s.recruit(*sOpts.MaxWorkers)
 	return s
 }
 
 // NewWorker 建立新工人
-func NewWorker(n Number) *Worker {
+func NewWorker(n Number, opts ...*options.WorkerOptions) *Worker {
+	wOpts := options.MergeWorkerOptions(opts...)
 	return &Worker{
 		Number: n,
-		Delay:  int64(rand.Intn(11)),
+		Delay:  int64(rand.Intn(*wOpts.MaxDelay + 1)),
 	}
 }

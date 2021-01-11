@@ -1,18 +1,22 @@
-package app
+package handler
 
 import (
 	"context"
 	"math/rand"
 	"sort"
+	"sync"
 	"time"
 
 	gw "github.com/memochou1993/worker-service/gen"
+	"github.com/memochou1993/worker-service/server/app"
+	"github.com/memochou1993/worker-service/server/options"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 var (
-	ws *Service
+	service *app.Service
+	mutex   = &sync.Mutex{}
 )
 
 // Server 服務
@@ -22,12 +26,12 @@ type Server struct {
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-	ws = NewService(NewServiceOptions().SetMaxWorkers(30))
+	service = app.NewService(options.Service().SetMaxWorkers(30))
 }
 
 // GetWorker 取出工人
 func (s *Server) GetWorker(ctx context.Context, r *gw.GetWorkerRequest) (*gw.GetWorkerResponse, error) {
-	w := ws.Dequeue()
+	w := service.Dequeue()
 	if w == nil {
 		return &gw.GetWorkerResponse{}, status.Error(codes.NotFound, "")
 	}
@@ -39,7 +43,7 @@ func (s *Server) PutWorker(ctx context.Context, r *gw.PutWorkerRequest) (*gw.Put
 	if r.Number < 1 {
 		return &gw.PutWorkerResponse{}, status.Error(codes.InvalidArgument, "")
 	}
-	ws.Enqueue(NewWorker(Number(r.Number)))
+	service.Enqueue(app.NewWorker(app.Number(r.Number), options.Worker().SetMaxDelay(10)))
 	return &gw.PutWorkerResponse{}, nil
 }
 
@@ -47,7 +51,7 @@ func (s *Server) PutWorker(ctx context.Context, r *gw.PutWorkerRequest) (*gw.Put
 func (s *Server) ListWorkers(ctx context.Context, r *gw.ListWorkersRequest) (*gw.ListWorkersResponse, error) {
 	var records []*gw.Record
 	mutex.Lock()
-	for number, summoned := range ws.Attendance {
+	for number, summoned := range service.Attendance {
 		records = append(records, &gw.Record{Number: float32(number), Summoned: float32(summoned)})
 	}
 	mutex.Unlock()
@@ -59,13 +63,13 @@ func (s *Server) ListWorkers(ctx context.Context, r *gw.ListWorkersRequest) (*gw
 
 // ShowWorker 查看工人
 func (s *Server) ShowWorker(ctx context.Context, r *gw.ShowWorkerRequest) (*gw.ShowWorkerResponse, error) {
-	n := Number(r.Number)
+	n := app.Number(r.Number)
 	mutex.Lock()
-	if _, ok := ws.Attendance[n]; !ok {
+	if _, ok := service.Attendance[n]; !ok {
 		mutex.Unlock()
 		return &gw.ShowWorkerResponse{}, status.Error(codes.NotFound, "")
 	}
-	record := gw.Record{Number: float32(n), Summoned: float32(ws.Attendance[n])}
+	record := gw.Record{Number: float32(n), Summoned: float32(service.Attendance[n])}
 	mutex.Unlock()
 	return &gw.ShowWorkerResponse{Worker: &record}, nil
 }

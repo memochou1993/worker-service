@@ -8,7 +8,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	gw "github.com/memochou1993/worker-service/gen"
-	"github.com/memochou1993/worker-service/server/app"
+	"github.com/memochou1993/worker-service/server/handler"
 	"google.golang.org/grpc"
 )
 
@@ -28,7 +28,7 @@ func grpcServer() {
 		log.Fatalln(err.Error())
 	}
 	s := grpc.NewServer()
-	gw.RegisterServiceServer(s, new(app.Server))
+	gw.RegisterServiceServer(s, new(handler.Server))
 	if err := s.Serve(ln); err != nil {
 		log.Fatalln(err.Error())
 	}

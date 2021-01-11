@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"github.com/memochou1993/worker-service/server/app"
+	"github.com/memochou1993/worker-service/server/options"
 )
 
 func TestSummon(t *testing.T) {
-	service := app.NewService(app.NewServiceOptions().SetMaxWorkers(50))
+	service := app.NewService(options.Service().SetMaxWorkers(50))
 
 	times := 100
 
