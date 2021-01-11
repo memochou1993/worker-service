@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/gobuffalo/packr/v2"
 	"html/template"
 	"log"
 	"net/http"
@@ -198,7 +200,12 @@ func response(w http.ResponseWriter, code int, data interface{}) {
 }
 
 func render(w http.ResponseWriter, name string) {
-	var tmpl = template.Must(template.ParseFiles("Client/public/" + name + ".html"))
+	box := packr.New("public", "../public")
+	html, err := box.FindString(fmt.Sprintf("%s.html", name))
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	tmpl, err := template.New(name).Parse(html)
 	if err := tmpl.Execute(w, nil); err != nil {
 		log.Fatalln(err.Error())
 	}
