@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/memochou1993/worker-service/server/app"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/memochou1993/worker-service/server/app"
 )
 
 func TestSummon(t *testing.T) {
-	service := app.NewService().Recruit(30)
+	service := app.NewService(app.NewServiceOptions().SetMaxWorkers(50))
 
 	times := 100
 

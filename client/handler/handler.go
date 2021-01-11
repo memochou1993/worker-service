@@ -3,21 +3,22 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"github.com/gorilla/mux"
-	gw "github.com/memochou1993/worker-service/gen"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/gorilla/mux"
+	gw "github.com/memochou1993/worker-service/gen"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
-	Target = ":8080"
+	target = ":8600"
 )
 
 var (
@@ -28,7 +29,7 @@ func init() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	Client = gw.NewServiceClient(newClientConn(ctx, Target))
+	Client = gw.NewServiceClient(newClientConn(ctx, target))
 }
 
 // Index 渲染首頁

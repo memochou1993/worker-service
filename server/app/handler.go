@@ -2,19 +2,27 @@ package app
 
 import (
 	"context"
+	"math/rand"
+	"sort"
+	"time"
+
 	gw "github.com/memochou1993/worker-service/gen"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"sort"
 )
 
 var (
-	ws = NewService().Recruit(30)
+	ws *Service
 )
 
 // Server 服務
 type Server struct {
 	gw.UnimplementedServiceServer
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+	ws = NewService(NewServiceOptions().SetMaxWorkers(30))
 }
 
 // GetWorker 取出工人

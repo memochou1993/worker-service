@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/memochou1993/worker-service/client/handler"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/memochou1993/worker-service/client/handler"
 )
 
 func main() {
@@ -18,5 +19,5 @@ func main() {
 	r.HandleFunc("/api/summon/workers/async", handler.SummonWorkersAsync).Methods(http.MethodGet)
 	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("client/public/assets/"))))
 
-	log.Fatalln(http.ListenAndServe(":80", r))
+	log.Fatalln(http.ListenAndServe(":9000", r))
 }

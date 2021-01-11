@@ -4,7 +4,6 @@ import (
 	"log"
 	"math/rand"
 	"sync"
-	"time"
 )
 
 var (
@@ -17,17 +16,28 @@ type Number int64
 // Summoned 工人被傳喚次數
 type Summoned int64
 
+// Worker 工人
+type Worker struct {
+	Number `json:"Number"`
+	Delay  int64 `json:"delay"`
+}
+
+// ServiceOptions 服務選項
+type ServiceOptions struct {
+	MaxWorkers int
+}
+
+// SetMaxWorkers 設置工人最大數量
+func (s *ServiceOptions) SetMaxWorkers(max int) *ServiceOptions {
+	s.MaxWorkers = max
+	return s
+}
+
 // Service 服務
 type Service struct {
 	Workers    chan *Worker
 	Attendance map[Number]Summoned
 	Summoned
-}
-
-// Worker 工人
-type Worker struct {
-	Number `json:"Number"`
-	Delay  int64 `json:"delay"`
 }
 
 // Enqueue 放入工人
@@ -51,18 +61,11 @@ func (s *Service) Dequeue() *Worker {
 	}
 }
 
-// Recruit 應徵工人
-func (s *Service) Recruit(n int) *Service {
-	wg := sync.WaitGroup{}
-	wg.Add(n)
+// recruit 填充工人
+func (s *Service) recruit(n int) {
 	for i := 1; i <= n; i++ {
-		go func(i int) {
-			defer wg.Done()
-			s.Workers <- NewWorker(Number(i))
-		}(i)
+		s.Workers <- NewWorker(Number(i))
 	}
-	wg.Wait()
-	return s
 }
 
 // log 紀錄出勤表
@@ -80,17 +83,25 @@ func (s *Service) log(w Worker) {
 	mutex.Unlock()
 }
 
+// NewServiceOptions 建立新服務選項
+func NewServiceOptions() *ServiceOptions {
+	return &ServiceOptions{
+		MaxWorkers: 10,
+	}
+}
+
 // NewService 建立新服務
-func NewService() *Service {
-	return &Service{
-		Workers:    make(chan *Worker, 30),
+func NewService(opts *ServiceOptions) *Service {
+	s := &Service{
+		Workers:    make(chan *Worker, opts.MaxWorkers),
 		Attendance: make(map[Number]Summoned),
 	}
+	s.recruit(opts.MaxWorkers)
+	return s
 }
 
 // NewWorker 建立新工人
 func NewWorker(n Number) *Worker {
-	rand.Seed(time.Now().UnixNano())
 	return &Worker{
 		Number: n,
 		Delay:  int64(rand.Intn(11)),

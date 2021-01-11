@@ -2,17 +2,18 @@ package main
 
 import (
 	"context"
+	"log"
+	"net"
+	"net/http"
+
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	gw "github.com/memochou1993/worker-service/gen"
 	"github.com/memochou1993/worker-service/server/app"
 	"google.golang.org/grpc"
-	"log"
-	"net"
-	"net/http"
 )
 
 const (
-	grpcServerEndpoint = ":8080"
+	grpcServerEndpoint = ":8600"
 	httpServerEndpoint = ":8890"
 )
 
