@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	target = ":8600"
+	target = ":8500"
 )
 
 var (
@@ -121,7 +121,7 @@ func ShowWorker(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusOK, resp)
 }
 
-// SummonWorkers dequeues and enqueues a worker.
+// SummonWorkers dequeues and enqueues workers.
 func SummonWorkers(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 

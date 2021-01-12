@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	grpcServerEndpoint = ":8600"
-	httpServerEndpoint = ":8890"
+	grpcServerEndpoint = ":8500"
+	httpServerEndpoint = ":8000"
 )
 
 func main() {
