@@ -5,7 +5,6 @@ go 1.15
 require (
 	github.com/gobuffalo/envy v1.9.0 // indirect
 	github.com/gobuffalo/packd v1.0.0 // indirect
-	github.com/gobuffalo/packr v1.30.1 // indirect
 	github.com/gobuffalo/packr/v2 v2.5.1
 	github.com/golang/protobuf v1.4.3
 	github.com/gorilla/mux v1.8.0
