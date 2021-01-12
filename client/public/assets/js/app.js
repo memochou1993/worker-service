@@ -5,6 +5,7 @@ const main = {
     data() {
         return {
             workers: [],
+            summoned: 0,
         };
     },
     mounted() {
@@ -18,6 +19,9 @@ const main = {
         setWorkers(workers) {
             this.workers = workers;
         },
+        setSummoned(summoned) {
+            this.summoned = summoned;
+        },
         async summon() {
             const { worker } = await this.fetchWorker();
             if (!worker) {
@@ -25,6 +29,7 @@ const main = {
             }
             worker.delay = worker.delay || 0;
             this.setWorkers([...this.workers, worker]);
+            this.setSummoned(this.summoned+1);
             await this.delay(worker.delay * 1000 + 250);
             await this.putWorker(worker);
             this.setWorkers(this.workers.filter(w => w.number !== worker.number));
@@ -33,7 +38,12 @@ const main = {
             return fetch('api/worker')
                 .then((res) => res.ok ? res.json() : Promise.reject(res.statusText))
                 .then((res) => res)
-                .catch(() => Object);
+                .catch(async () => {
+                    await this.changeCursor('progress');
+                    await this.delay(1000);
+                    await this.changeCursor('grab');
+                    return Object;
+                });
         },
         putWorker(worker) {
             const init = {
@@ -46,6 +56,9 @@ const main = {
                 .catch((err) => {
                     console.log(err);
                 });
+        },
+        changeCursor(cursor) {
+            document.querySelector('body').style.cursor = cursor;
         },
         delay(milliseconds) {
             return new Promise((resolve) => setTimeout(() => resolve(), milliseconds));

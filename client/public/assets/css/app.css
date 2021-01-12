@@ -1,30 +1,44 @@
 html {
-    cursor: pointer;
-    user-select: none;
     font-family: "Andale Mono", serif;
+    user-select: none;
 }
 
 body {
+    background-color: ivory;
+    cursor: grab;
+    height: 100vh;
     margin: 0;
 }
+body:active {
+    cursor: grabbing;
+}
 
-#main {
-    display: inline-flex;
+#header {
+    text-align: center;
+}
+#header > div {
+    margin: 10px 0;
+}
+#header > h1 {
+    margin: 20px;
+}
+
+.worker {
+    display: inline-block;
     text-align: center;
     width: 10vw;
 }
-
-img, progress {
-    width: 80%;
+.worker img, progress {
+    width: 85%;
 }
 
-#percentage {
-    font-size: 8px;
+.small {
+    font-size: 10px;
 }
 
 @media only screen and (max-width: 600px) {
-    #main {
-        width: 25vw;
+    .worker {
+        width: 20vw;
     }
 }
 

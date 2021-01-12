@@ -14,23 +14,34 @@
         id="app"
     >
         <div
+            id="header"
+        >
+            <h1>
+                Worker Service
+            </h1>
+            <div>
+                Summoned: ${ summoned.toLocaleString() }
+            </div>
+            <div>
+                Working: ${ workers.length.toLocaleString() }
+            </div>
+        </div>
+        <div
             v-for="(worker) in workers"
             :key="worker.number"
-            id="main"
+            class="worker"
         >
+            <img
+                :src="`./assets/images/${worker.number % 9 + 1}.png`"
+                alt="Worker"
+            />
             <div>
-                <img
-                    :src="`./assets/images/${worker.number % 9 + 1}.png`"
-                    alt="Worker"
-                />
-                <div>
-                    ${ worker.number }
-                </div>
-                <app-progress
-                    :delay="worker.delay"
-                >
-                </app-progress>
+                ${ worker.number }
             </div>
+            <app-progress
+                :delay="worker.delay"
+            >
+            </app-progress>
         </div>
     </div>
     <script type="text/x-template" id="app-progress">
@@ -40,7 +51,7 @@
         >
         </progress>
         <div
-            id="percentage"
+            class="small"
         >
             ${ progress }/${ delay }
         </div>
