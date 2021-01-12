@@ -1,24 +1,24 @@
 package options
 
-// WorkerOptions 工人選項
+// WorkerOptions contains options to configure a Worker instance.
 type WorkerOptions struct {
 	MaxDelay *int
 }
 
-// SetMaxDelay 設置工人最大延遲時間
+// SetMaxDelay specifies the maximum amount of delay.
 func (s *WorkerOptions) SetMaxDelay(max int) *WorkerOptions {
 	s.MaxDelay = &max
 	return s
 }
 
-// Worker 工人選項
+// Worker creates a new WorkerOptions instance.
 func Worker() *WorkerOptions {
 	return &WorkerOptions{
 		MaxDelay: new(int),
 	}
 }
 
-// MergeWorkerOptions 合併工人選項
+// MergeWorkerOptions combines the given WorkerOptions instances into a single WorkerOptions in a last-one-wins fashion.
 func MergeWorkerOptions(opts ...*WorkerOptions) *WorkerOptions {
 	wOpts := Worker()
 	for _, wo := range opts {

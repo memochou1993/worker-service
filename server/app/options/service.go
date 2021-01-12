@@ -1,24 +1,24 @@
 package options
 
-// ServiceOptions 服務選項
+// ServiceOptions contains options to configure a Service instance.
 type ServiceOptions struct {
 	MaxWorkers *int
 }
 
-// SetMaxWorkers 設置服務最大工人數量
+// SetMaxWorkers specifies the maximum amount of workers.
 func (s *ServiceOptions) SetMaxWorkers(max int) *ServiceOptions {
 	s.MaxWorkers = &max
 	return s
 }
 
-// Service 服務選項
+// Service creates a new ServiceOptions instance.
 func Service() *ServiceOptions {
 	return &ServiceOptions{
 		MaxWorkers: new(int),
 	}
 }
 
-// MergeServiceOptions 合併服務選項
+// MergeServiceOptions combines the given ServiceOptions instances into a single ServiceOptions in a last-one-wins fashion.
 func MergeServiceOptions(opts ...*ServiceOptions) *ServiceOptions {
 	sOpts := Service()
 	for _, so := range opts {

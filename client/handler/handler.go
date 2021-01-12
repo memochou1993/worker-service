@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gobuffalo/packr/v2"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/gobuffalo/packr/v2"
 
 	"github.com/gorilla/mux"
 	gw "github.com/memochou1993/worker-service/gen"
@@ -24,26 +25,26 @@ const (
 )
 
 var (
-	Client gw.ServiceClient
+	client gw.ServiceClient
 )
 
 func init() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	Client = gw.NewServiceClient(newClientConn(ctx, target))
+	client = gw.NewServiceClient(NewClientConn(ctx, target))
 }
 
-// Index 渲染首頁
+// Index renders a home page.
 func Index(w http.ResponseWriter, r *http.Request) {
 	render(w, "index")
 }
 
-// GetWorker 取出工人
+// GetWorker dequeues a worker.
 func GetWorker(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 
-	resp, err := Client.GetWorker(context.Background(), &gw.GetWorkerRequest{})
+	resp, err := client.GetWorker(context.Background(), &gw.GetWorkerRequest{})
 	s, ok := status.FromError(err)
 	if !ok {
 		response(w, http.StatusInternalServerError, nil)
@@ -62,7 +63,7 @@ func GetWorker(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusOK, resp)
 }
 
-// PutWorker 放回工人
+// PutWorker enqueues a worker.
 func PutWorker(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 
@@ -71,7 +72,7 @@ func PutWorker(w http.ResponseWriter, r *http.Request) {
 		response(w, http.StatusBadRequest, nil)
 		return
 	}
-	if _, err := Client.PutWorker(context.Background(), &req); err != nil {
+	if _, err := client.PutWorker(context.Background(), &req); err != nil {
 		response(w, http.StatusInternalServerError, nil)
 		return
 	}
@@ -79,11 +80,11 @@ func PutWorker(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusNoContent, nil)
 }
 
-// ListWorkers 列出工人
+// ListWorkers lists workers.
 func ListWorkers(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 
-	resp, err := Client.ListWorkers(context.Background(), &gw.ListWorkersRequest{})
+	resp, err := client.ListWorkers(context.Background(), &gw.ListWorkersRequest{})
 	if err != nil {
 		response(w, http.StatusInternalServerError, nil)
 		return
@@ -92,7 +93,7 @@ func ListWorkers(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusOK, resp)
 }
 
-// ShowWorker 查看工人
+// ShowWorker shows a worker.
 func ShowWorker(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 
@@ -102,7 +103,7 @@ func ShowWorker(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := Client.ShowWorker(context.Background(), &gw.ShowWorkerRequest{Number: float32(n)})
+	resp, err := client.ShowWorker(context.Background(), &gw.ShowWorkerRequest{Number: float32(n)})
 	s, ok := status.FromError(err)
 	if !ok {
 		response(w, http.StatusInternalServerError, nil)
@@ -120,7 +121,7 @@ func ShowWorker(w http.ResponseWriter, r *http.Request) {
 	response(w, http.StatusOK, resp)
 }
 
-// SummonWorkers 傳喚工人
+// SummonWorkers dequeues and enqueues a worker.
 func SummonWorkers(w http.ResponseWriter, r *http.Request) {
 	defer closeBody(r)
 
@@ -150,19 +151,15 @@ func SummonWorkers(w http.ResponseWriter, r *http.Request) {
 	ListWorkers(w, r)
 }
 
-// summon 傳喚工人
 func summon(ctx context.Context) {
-	// 取出工人
-	resp, err := Client.GetWorker(ctx, &gw.GetWorkerRequest{})
+	resp, err := client.GetWorker(ctx, &gw.GetWorkerRequest{})
 
-	// 檢查錯誤
 	s, ok := status.FromError(err)
 	if !ok {
 		log.Println(err.Error())
 		return
 	}
 
-	// 重試
 	if s.Code() != codes.OK {
 		time.Sleep(time.Second)
 		log.Println("Retrying...")
@@ -170,12 +167,10 @@ func summon(ctx context.Context) {
 		return
 	}
 
-	// 延遲
 	time.Sleep(time.Duration(resp.Worker.Delay) * time.Microsecond)
 	log.Printf("Number: %d, Delay: %d", int64(resp.Worker.Number), int64(resp.Worker.Delay))
 
-	// 放回工人
-	if _, err = Client.PutWorker(ctx, &gw.PutWorkerRequest{Number: resp.Worker.Number}); err != nil {
+	if _, err = client.PutWorker(ctx, &gw.PutWorkerRequest{Number: resp.Worker.Number}); err != nil {
 		time.Sleep(time.Second)
 		log.Println("Retrying...")
 		summon(ctx)
@@ -211,7 +206,8 @@ func render(w http.ResponseWriter, name string) {
 	}
 }
 
-func newClientConn(ctx context.Context, addr string) *grpc.ClientConn {
+// NewClientConn creates a new ClientConn instance.
+func NewClientConn(ctx context.Context, addr string) *grpc.ClientConn {
 	conn, err := grpc.DialContext(ctx, addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatal(err.Error())

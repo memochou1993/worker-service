@@ -13,26 +13,26 @@ var (
 	mutex = &sync.Mutex{}
 )
 
-// Number 工人號碼
+// Number represents an ID of the worker.
 type Number int64
 
-// Summoned 工人被傳喚次數
+// Summoned represents a number of times that a worker summoned by client.
 type Summoned int64
 
-// Worker 工人
+// Worker represents a worker.
 type Worker struct {
 	Number `json:"Number"`
 	Delay  int64 `json:"delay"`
 }
 
-// Service 服務
+// Service represents a service.
 type Service struct {
 	Workers    chan *Worker
 	Attendance map[Number]Summoned
 	Summoned
 }
 
-// Enqueue 放入工人
+// Enqueue enqueues a Worker instance.
 func (s *Service) Enqueue(w *Worker) bool {
 	select {
 	case s.Workers <- NewWorker(w.Number, options.Worker().SetMaxDelay(10)):
@@ -42,7 +42,7 @@ func (s *Service) Enqueue(w *Worker) bool {
 	}
 }
 
-// Dequeue 取出工人
+// Dequeue dequeues a Worker instance.
 func (s *Service) Dequeue() *Worker {
 	select {
 	case w := <-s.Workers:
@@ -53,7 +53,6 @@ func (s *Service) Dequeue() *Worker {
 	}
 }
 
-// recruit 填充工人
 func (s *Service) recruit(n int) {
 	wg := sync.WaitGroup{}
 	wg.Add(n)
@@ -67,7 +66,6 @@ func (s *Service) recruit(n int) {
 	wg.Wait()
 }
 
-// log 紀錄出勤表
 func (s *Service) log(w Worker) {
 	mutex.Lock()
 	if _, ok := s.Attendance[w.Number]; ok {
@@ -82,7 +80,7 @@ func (s *Service) log(w Worker) {
 	mutex.Unlock()
 }
 
-// NewService 建立新服務
+// NewService creates a new Service instance.
 func NewService(opts ...*options.ServiceOptions) *Service {
 	sOpts := options.MergeServiceOptions(opts...)
 	s := &Service{
@@ -93,7 +91,7 @@ func NewService(opts ...*options.ServiceOptions) *Service {
 	return s
 }
 
-// NewWorker 建立新工人
+// NewWorker creates a new Worker instance.
 func NewWorker(n Number, opts ...*options.WorkerOptions) *Worker {
 	wOpts := options.MergeWorkerOptions(opts...)
 	return &Worker{

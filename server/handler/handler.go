@@ -19,7 +19,7 @@ var (
 	mutex   = &sync.Mutex{}
 )
 
-// Server 服務
+// Server represents a service server.
 type Server struct {
 	gw.UnimplementedServiceServer
 }
@@ -29,7 +29,7 @@ func init() {
 	service = app.NewService(options.Service().SetMaxWorkers(30))
 }
 
-// GetWorker 取出工人
+// GetWorker dequeues a worker.
 func (s *Server) GetWorker(ctx context.Context, r *gw.GetWorkerRequest) (*gw.GetWorkerResponse, error) {
 	w := service.Dequeue()
 	if w == nil {
@@ -38,7 +38,7 @@ func (s *Server) GetWorker(ctx context.Context, r *gw.GetWorkerRequest) (*gw.Get
 	return &gw.GetWorkerResponse{Worker: &gw.Worker{Number: float32(w.Number), Delay: float32(w.Delay)}}, nil
 }
 
-// PutWorker 放回工人
+// PutWorker enqueues a worker.
 func (s *Server) PutWorker(ctx context.Context, r *gw.PutWorkerRequest) (*gw.PutWorkerResponse, error) {
 	if r.Number < 1 {
 		return &gw.PutWorkerResponse{}, status.Error(codes.InvalidArgument, "")
@@ -47,7 +47,7 @@ func (s *Server) PutWorker(ctx context.Context, r *gw.PutWorkerRequest) (*gw.Put
 	return &gw.PutWorkerResponse{}, nil
 }
 
-// ListWorkers 列出工人
+// ListWorkers lists workers.
 func (s *Server) ListWorkers(ctx context.Context, r *gw.ListWorkersRequest) (*gw.ListWorkersResponse, error) {
 	var records []*gw.Record
 	mutex.Lock()
@@ -61,7 +61,7 @@ func (s *Server) ListWorkers(ctx context.Context, r *gw.ListWorkersRequest) (*gw
 	return &gw.ListWorkersResponse{Workers: records}, nil
 }
 
-// ShowWorker 查看工人
+// ShowWorker shows a worker.
 func (s *Server) ShowWorker(ctx context.Context, r *gw.ShowWorkerRequest) (*gw.ShowWorkerResponse, error) {
 	n := app.Number(r.Number)
 	mutex.Lock()

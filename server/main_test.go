@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/memochou1993/worker-service/server/app"
-	"github.com/memochou1993/worker-service/server/app/options"
 	"sync"
 	"testing"
+
+	"github.com/memochou1993/worker-service/server/app"
+	"github.com/memochou1993/worker-service/server/app/options"
 )
 
 func TestEnqueue(t *testing.T) {
