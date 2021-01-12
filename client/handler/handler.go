@@ -153,14 +153,7 @@ func SummonWorkers(w http.ResponseWriter, r *http.Request) {
 
 func summon(ctx context.Context) {
 	resp, err := client.GetWorker(ctx, &gw.GetWorkerRequest{})
-
-	s, ok := status.FromError(err)
-	if !ok {
-		log.Println(err.Error())
-		return
-	}
-
-	if s.Code() != codes.OK {
+	if err != nil {
 		time.Sleep(time.Second)
 		log.Println("Retrying...")
 		summon(ctx)
