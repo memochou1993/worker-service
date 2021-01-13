@@ -1,5 +1,6 @@
 html {
     font-family: "Andale Mono", serif;
+    cursor: grab;
     scrollbar-width: none;
     -ms-overflow-style: none;
     user-select: none;
@@ -7,14 +8,13 @@ html {
 html::-webkit-scrollbar {
     width: 0px;
 }
+html:active {
+    cursor: grabbing;
+}
 
 body {
     background-color: ivory;
-    cursor: grab;
     margin: 0 0 30px 0;
-}
-body:active {
-    cursor: grabbing;
 }
 
 #header {
