@@ -8,6 +8,9 @@ const main = {
             summoned: 0,
         };
     },
+    created() {
+        this.reset();
+    },
     mounted() {
         window.onbeforeunload = async () => {};
         document.body.removeAttribute('hidden');
@@ -22,6 +25,11 @@ const main = {
         setSummoned(summoned) {
             this.summoned = summoned;
         },
+        async reset() {
+            const numbers = Array(30).fill(0).map((_, i) => i + 1);
+            await numbers.forEach(() => this.fetchWorker());
+            await numbers.sort(() => Math.random() - 0.5).forEach((n) => this.putWorker(n));
+        },
         async summon() {
             const { worker } = await this.fetchWorker();
             if (!worker) {
@@ -31,7 +39,7 @@ const main = {
             this.setWorkers([...this.workers, worker]);
             this.setSummoned(this.summoned+1);
             await this.delay(worker.delay * 1000 + 250);
-            await this.putWorker(worker);
+            await this.putWorker(worker.number);
             this.setWorkers(this.workers.filter(w => w.number !== worker.number));
         },
         fetchWorker() {
@@ -45,13 +53,12 @@ const main = {
                     return Object;
                 });
         },
-        putWorker(worker) {
-            const init = {
-                body: JSON.stringify({ number: worker.number }),
+        putWorker(number) {
+            return fetch('api/worker', {
+                body: JSON.stringify({ number }),
                 headers: { 'content-type': 'application/json' },
                 method: 'PUT',
-            };
-            return fetch('api/worker', init)
+            })
                 .then()
                 .catch((err) => {
                     console.log(err);
