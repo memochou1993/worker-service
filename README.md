@@ -27,7 +27,7 @@ docker-compose up -d
 
 ### Server - gRPC API
 
-Running on port: http://localhost:8500
+Running on port: <http://localhost:8500>
 
 Method|Description
 -|-
@@ -38,7 +38,7 @@ ShowWorker|Shows a worker.
 
 ### Server - HTTP API
 
-Running on port: http://localhost:8000
+Running on port: <http://localhost:8000>
 
 Method|Path|Description
 -|-|-
@@ -49,7 +49,7 @@ GET|/workers/{n}|Shows a worker.
 
 ### Client - HTTP API
 
-Running on port: http://localhost:9000
+Running on port: <http://localhost:9000>
 
 Method|Path|Description
 -|-|-
@@ -58,6 +58,22 @@ PUT|/api/worker|Enqueues a worker.
 GET|/api/workers|Lists workers.
 GET|/api/workers/{n}|Shows a worker.
 GET|/api/workers/summon/async/{a}/sync/{s}|Dequeues and enqueues workers.
+
+## Compiling
+
+Compile the server.
+
+```BASH
+cd server
+go build
+```
+
+Compile the client.
+
+```BASH
+cd client
+packr build
+```
 
 ## Testing
 
