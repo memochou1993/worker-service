@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/gobuffalo/packr/v2"
 	"log"
 	"net/http"
 
@@ -21,9 +20,7 @@ func main() {
 	r.HandleFunc("/api/workers", handler.ListWorkers).Methods(http.MethodGet)
 	r.HandleFunc("/api/workers/{n}", handler.ShowWorker).Methods(http.MethodGet)
 	r.HandleFunc("/api/workers/summon/async/{a}/sync/{s}", handler.SummonWorkers).Methods(http.MethodGet)
-
-	box := packr.New("assets", "./public/assets")
-	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(box)))
+	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("client/public/assets/"))))
 
 	log.Printf("Worker service HTTP client started: http://localhost%s", addr)
 	log.Fatal(http.ListenAndServe(addr, r))

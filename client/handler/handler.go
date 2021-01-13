@@ -3,15 +3,12 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
-
-	"github.com/gobuffalo/packr/v2"
 
 	"github.com/gorilla/mux"
 	gw "github.com/memochou1993/worker-service/gen"
@@ -21,7 +18,7 @@ import (
 )
 
 const (
-	target = ":8500"
+	target = "server:8500"
 )
 
 var (
@@ -188,12 +185,7 @@ func response(w http.ResponseWriter, code int, data interface{}) {
 }
 
 func render(w http.ResponseWriter, name string) {
-	box := packr.New("public", "../public")
-	html, err := box.FindString(fmt.Sprintf("%s.html", name))
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	tmpl, err := template.New(name).Parse(html)
+	var tmpl = template.Must(template.ParseFiles("client/public/" + name + ".html"))
 	if err := tmpl.Execute(w, nil); err != nil {
 		log.Fatal(err.Error())
 	}

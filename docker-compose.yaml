@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  server:
+    container_name: worker-service-server
+    build:
+      context: .
+      dockerfile: docker/server/Dockerfile
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${APP_SERVER_PORT}:8000"
+      - "8500:8500"
+    networks:
+      - default
+
+  client:
+    container_name: worker-service-client
+    build:
+      context: .
+      dockerfile: docker/client/Dockerfile
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - server
+    ports:
+      - "${APP_CLIENT_PORT}:9000"
+    networks:
+      - default
+
+networks:
+  default:
