@@ -1,16 +1,15 @@
-package main
+package app
 
 import (
 	"sync"
 	"testing"
 
-	"github.com/memochou1993/worker-service/server/app"
 	"github.com/memochou1993/worker-service/server/app/options"
 )
 
 func TestEnqueue(t *testing.T) {
 	number := 50
-	service := app.NewService(options.Service().SetMaxWorkers(number))
+	service := NewService(options.Service().SetMaxWorkers(number))
 
 	for i := 0; i < number; i++ {
 		<-service.Workers
@@ -21,7 +20,7 @@ func TestEnqueue(t *testing.T) {
 	for i := 0; i < number; i++ {
 		go func(i int) {
 			defer wg.Done()
-			service.Enqueue(app.NewWorker(app.Number(i + 1)))
+			service.Enqueue(NewWorker(Number(i + 1)))
 		}(i)
 	}
 	wg.Wait()
@@ -33,7 +32,7 @@ func TestEnqueue(t *testing.T) {
 
 func TestDequeue(t *testing.T) {
 	number := 50
-	service := app.NewService(options.Service().SetMaxWorkers(number))
+	service := NewService(options.Service().SetMaxWorkers(number))
 
 	wg := sync.WaitGroup{}
 	wg.Add(number)
