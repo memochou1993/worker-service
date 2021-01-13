@@ -5,13 +5,22 @@
 Start the server.
 
 ```BASH
-go run server/main.go
+go run ./server/main.go
 ```
 
 Start the client.
 
 ```BASH
-go run client/main.go
+go run ./client/main.go
+```
+
+## Docker
+
+Start the server and client.
+
+```
+git checkout docker
+docker-compose up -d
 ```
 
 ## API
@@ -49,3 +58,18 @@ PUT|/api/worker|Enqueues a worker.
 GET|/api/workers|Lists workers.
 GET|/api/workers/{n}|Shows a worker.
 GET|/api/workers/summon/async/{a}/sync/{s}|Dequeues and enqueues workers.
+
+## Testing
+
+Test the server.
+
+```BASH
+go test ./server/app
+```
+
+Test the client.
+
+```BASH
+go run server/main.go
+go test ./client/handler
+```

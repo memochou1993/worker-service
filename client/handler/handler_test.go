@@ -1,24 +1,18 @@
-package main
+package handler
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	"github.com/memochou1993/worker-service/client/handler"
 	gw "github.com/memochou1993/worker-service/gen"
 )
 
-const (
-	target = ":8500"
-)
-
-var (
-	client gw.ServiceClient
-)
-
 func init() {
-	client = gw.NewServiceClient(handler.NewClientConn(context.Background(), target))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	client = gw.NewServiceClient(NewClientConn(ctx, target))
 }
 
 func TestGetWorker(t *testing.T) {
