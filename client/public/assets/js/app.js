@@ -6,6 +6,7 @@ const main = {
         return {
             workers: [],
             summoned: 0,
+            gems: 0,
         };
     },
     mounted() {
@@ -19,6 +20,9 @@ const main = {
         },
         setSummoned(summoned) {
             this.summoned = summoned;
+        },
+        setGems(gems) {
+            this.gems = gems;
         },
         async initialize() {
             const numbers = Array(30).fill(0).map((_, i) => i + 1);
@@ -35,10 +39,11 @@ const main = {
             }
             worker.delay = worker.delay || 0;
             this.setWorkers([...this.workers, worker]);
-            this.setSummoned(this.summoned+1);
+            this.setSummoned(this.summoned + 1);
             await this.delay(worker.delay * 1000 + 250);
             await this.putWorker(worker.number);
             this.setWorkers(this.workers.filter(w => w.number !== worker.number));
+            this.setGems(this.gems + worker.delay);
         },
         fetchWorker() {
             return fetch('api/worker')
