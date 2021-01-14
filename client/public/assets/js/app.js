@@ -8,15 +8,10 @@ const main = {
             summoned: 0,
         };
     },
-    created() {
-        this.reset();
-    },
     mounted() {
-        window.onbeforeunload = async () => {};
+        this.initialize();
         document.body.removeAttribute('hidden');
-        document.addEventListener('click', async () => {
-            await this.summon();
-        });
+        window.onbeforeunload = async () => {};
     },
     methods: {
         setWorkers(workers) {
@@ -25,10 +20,13 @@ const main = {
         setSummoned(summoned) {
             this.summoned = summoned;
         },
-        async reset() {
+        async initialize() {
             const numbers = Array(30).fill(0).map((_, i) => i + 1);
-            await numbers.forEach(() => this.fetchWorker());
-            await numbers.sort(() => Math.random() - 0.5).forEach((n) => this.putWorker(n));
+            this.changeCursor('progress');
+            await Promise.all(numbers.map(() => this.fetchWorker()));
+            await Promise.all(numbers.sort(() => Math.random() - 0.5).map((n) => this.putWorker(n)));
+            this.changeCursor('grab');
+            document.addEventListener('click', () => this.summon());
         },
         async summon() {
             const { worker } = await this.fetchWorker();
@@ -65,7 +63,7 @@ const main = {
                 });
         },
         changeCursor(cursor) {
-            document.querySelector('body').style.cursor = cursor;
+            document.querySelector('html').style.cursor = cursor;
         },
         delay(milliseconds) {
             return new Promise((resolve) => setTimeout(() => resolve(), milliseconds));
