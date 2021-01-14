@@ -1,12 +1,13 @@
 html {
     font-family: "Andale Mono", serif;
     cursor: grab;
-    scrollbar-width: none;
     -ms-overflow-style: none;
+    scrollbar-width: none;
+    touch-action: manipulation;
     user-select: none;
 }
 html::-webkit-scrollbar {
-    width: 0px;
+    width: 0;
 }
 html:active {
     cursor: grabbing;

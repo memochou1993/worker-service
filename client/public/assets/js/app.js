@@ -9,11 +9,9 @@ const main = {
         };
     },
     mounted() {
-        window.onbeforeunload = async () => {};
+        this.initialize();
         document.body.removeAttribute('hidden');
-        document.addEventListener('click', async () => {
-            await this.summon();
-        });
+        window.onbeforeunload = async () => {};
     },
     methods: {
         setWorkers(workers) {
@@ -21,6 +19,14 @@ const main = {
         },
         setSummoned(summoned) {
             this.summoned = summoned;
+        },
+        async initialize() {
+            const numbers = Array(30).fill(0).map((_, i) => i + 1);
+            this.changeCursor('progress');
+            await Promise.all(numbers.map(() => this.fetchWorker()));
+            await Promise.all(numbers.sort(() => Math.random() - 0.5).map((n) => this.putWorker(n)));
+            this.changeCursor('grab');
+            document.addEventListener('click', () => this.summon());
         },
         async summon() {
             const { worker } = await this.fetchWorker();
@@ -31,7 +37,7 @@ const main = {
             this.setWorkers([...this.workers, worker]);
             this.setSummoned(this.summoned+1);
             await this.delay(worker.delay * 1000 + 250);
-            await this.putWorker(worker);
+            await this.putWorker(worker.number);
             this.setWorkers(this.workers.filter(w => w.number !== worker.number));
         },
         fetchWorker() {
@@ -45,20 +51,19 @@ const main = {
                     return Object;
                 });
         },
-        putWorker(worker) {
-            const init = {
-                body: JSON.stringify({ number: worker.number }),
+        putWorker(number) {
+            return fetch('api/worker', {
+                body: JSON.stringify({ number }),
                 headers: { 'content-type': 'application/json' },
                 method: 'PUT',
-            };
-            return fetch('api/worker', init)
+            })
                 .then()
                 .catch((err) => {
                     console.log(err);
                 });
         },
         changeCursor(cursor) {
-            document.querySelector('body').style.cursor = cursor;
+            document.querySelector('html').style.cursor = cursor;
         },
         delay(milliseconds) {
             return new Promise((resolve) => setTimeout(() => resolve(), milliseconds));
