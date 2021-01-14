@@ -4,7 +4,6 @@ import (
 	"log"
 	"math/rand"
 	"sync"
-	"time"
 
 	"github.com/memochou1993/worker-service/server/app/options"
 )
@@ -27,15 +26,19 @@ type Worker struct {
 
 // Service represents a service.
 type Service struct {
-	Workers    chan *Worker
+	Major      chan *Worker
+	Minor      chan *Worker
 	Attendance map[Number]Summoned
 	Summoned
 }
 
 // Enqueue enqueues a Worker instance.
 func (s *Service) Enqueue(w *Worker) bool {
+	worker := NewWorker(w.Number, options.Worker().SetMaxDelay(10))
 	select {
-	case s.Workers <- NewWorker(w.Number, options.Worker().SetMaxDelay(10)):
+	case s.Major <- worker:
+		return true
+	case s.Minor <- worker:
 		return true
 	default:
 		return false
@@ -45,7 +48,10 @@ func (s *Service) Enqueue(w *Worker) bool {
 // Dequeue dequeues a Worker instance.
 func (s *Service) Dequeue() *Worker {
 	select {
-	case w := <-s.Workers:
+	case w := <-s.Major:
+		s.log(*w)
+		return w
+	case w := <-s.Minor:
 		s.log(*w)
 		return w
 	default:
@@ -59,8 +65,7 @@ func (s *Service) recruit(n int) {
 	for i := 1; i <= n; i++ {
 		go func(i int) {
 			defer wg.Done()
-			time.Sleep(time.Microsecond)
-			s.Workers <- NewWorker(Number(i), options.Worker().SetMaxDelay(10))
+			s.Enqueue(NewWorker(Number(i), options.Worker().SetMaxDelay(10)))
 		}(i)
 	}
 	wg.Wait()
@@ -84,7 +89,8 @@ func (s *Service) log(w Worker) {
 func NewService(opts ...*options.ServiceOptions) *Service {
 	sOpts := options.MergeServiceOptions(opts...)
 	s := &Service{
-		Workers:    make(chan *Worker, *sOpts.MaxWorkers),
+		Major:      make(chan *Worker, *sOpts.MaxWorkers/2),
+		Minor:      make(chan *Worker, *sOpts.MaxWorkers/2),
 		Attendance: make(map[Number]Summoned),
 	}
 	s.recruit(*sOpts.MaxWorkers)
