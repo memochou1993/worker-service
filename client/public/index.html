@@ -35,7 +35,7 @@
             class="worker"
         >
             <img
-                :src="`./assets/images/${worker.number % 9 + 1}.png`"
+                :src="`./assets/images/${getImage(worker.number, worker.delay)}.png`"
                 alt="Worker"
             />
             <div>

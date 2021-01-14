@@ -70,6 +70,31 @@ const main = {
         changeCursor(cursor) {
             document.querySelector('html').style.cursor = cursor;
         },
+        getImage(number, delay) {
+            if (delay === 10) {
+                return '9';
+            }
+            switch (true) {
+                case this.gems >= 5000:
+                    return `${number % 8 + 1}-${5}`;
+                case this.gems >= 2500 && delay >= 8:
+                    return `${number % 8 + 1}-${5}`;
+                case this.gems >= 2500:
+                    return `${number % 8 + 1}-${4}`;
+                case this.gems >= 1000 && delay >= 8:
+                    return `${number % 8 + 1}-${4}`;
+                case this.gems >= 1000:
+                    return `${number % 8 + 1}-${3}`;
+                case this.gems >= 500 && delay >= 8:
+                    return `${number % 8 + 1}-${3}`;
+                case this.gems >= 500:
+                    return `${number % 8 + 1}-${2}`;
+                case this.gems >= 100 && delay >= 8:
+                    return `${number % 8 + 1}-${2}`;
+                default:
+                    return `${number % 8 + 1}-${1}`;
+            }
+        },
         delay(milliseconds) {
             return new Promise((resolve) => setTimeout(() => resolve(), milliseconds));
         },
